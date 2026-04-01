@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { ecommerceAPI } from '@/lib/axios';
 import ProductCard from '@/components/products/ProductCard';
 import ProductFilters from '@/components/products/ProductFilters';
 
@@ -14,12 +13,14 @@ async function getProducts(searchParams) {
     Object.entries(searchParams).forEach(([key, value]) => {
       if (value) params.set(key, value);
     });
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_ECOMMERCE_API_URL}/api/products?${params.toString()}`,
-      { cache: 'no-store' }
-    );
-    return await res.json();
+    const url = `${process.env.NEXT_PUBLIC_ECOMMERCE_API_URL}/api/products?${params.toString()}`;
+    console.log('Fetching:', url);
+    const res = await fetch(url, { cache: 'no-store' });
+    const data = await res.json();
+    console.log('Response:', JSON.stringify(data));
+    return data;
   } catch (error) {
+    console.error('Error:', error);
     return { products: [], total: 0, pages: 1, currentPage: 1 };
   }
 }
