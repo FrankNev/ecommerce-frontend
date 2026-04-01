@@ -1,11 +1,14 @@
-import { ecommerceAPI } from '@/lib/axios';
 import Image from 'next/image';
 import AddToCartButton from '@/components/products/AddToCartButton';
 
 export async function generateMetadata({ params }) {
     const { id } = await params;
     try {
-        const { data } = await ecommerceAPI.get(`/api/products/${id}`);
+        const res = await fetch(
+            `${process.env.NEXT_PUBLIC_ECOMMERCE_API_URL}/api/products/${id}`,
+            { cache: 'no-store' }
+        );
+        const data = await res.json();
         return {
             title: data.name,
             description: data.description,
@@ -17,8 +20,12 @@ export async function generateMetadata({ params }) {
 
 async function getProduct(id) {
     try {
-        const { data } = await ecommerceAPI.get(`/api/products/${id}`);
-        return data;
+        const res = await fetch(
+            `${process.env.NEXT_PUBLIC_ECOMMERCE_API_URL}/api/products/${id}`,
+            { cache: 'no-store' }
+        );
+        if (!res.ok) return null;
+        return await res.json();
     } catch {
         return null;
     }
@@ -82,8 +89,8 @@ export default async function ProductDetailPage({ params }) {
 
                     <div className="flex items-center gap-2">
                         <span className={`text-sm font-medium px-3 py-1 rounded-full ${product.stock > 0
-                                ? 'bg-green-100 text-green-700'
-                                : 'bg-red-100 text-red-700'
+                            ? 'bg-green-100 text-green-700'
+                            : 'bg-red-100 text-red-700'
                             }`}>
                             {product.stock > 0 ? `${product.stock} disponibles` : 'Sin stock'}
                         </span>

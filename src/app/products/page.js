@@ -14,8 +14,11 @@ async function getProducts(searchParams) {
     Object.entries(searchParams).forEach(([key, value]) => {
       if (value) params.set(key, value);
     });
-    const { data } = await ecommerceAPI.get(`/api/products?${params.toString()}`);
-    return data;
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_ECOMMERCE_API_URL}/api/products?${params.toString()}`,
+      { cache: 'no-store' }
+    );
+    return await res.json();
   } catch (error) {
     return { products: [], total: 0, pages: 1, currentPage: 1 };
   }
@@ -23,8 +26,11 @@ async function getProducts(searchParams) {
 
 async function getCategories() {
   try {
-    const { data } = await ecommerceAPI.get('/api/categories');
-    return data;
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_ECOMMERCE_API_URL}/api/categories`,
+      { cache: 'no-store' }
+    );
+    return await res.json();
   } catch (error) {
     return [];
   }
@@ -72,8 +78,8 @@ export default async function ProductsPage({ searchParams }) {
                       key={page}
                       href={`/products?page=${page}`}
                       className={`px-4 py-2 rounded-lg text-sm font-medium transition ${page === currentPage
-                          ? 'bg-black text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        ? 'bg-black text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                         }`}
                     >
                       {page}
