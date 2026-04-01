@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { authAPI } from '@/lib/axios';
@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const setAuth = useAuthStore(state => state.setAuth);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ email: '', password: '' });
@@ -26,7 +27,8 @@ export default function LoginPage() {
       const { data } = await authAPI.post('/api/auth/login', form);
       setAuth(data.user, data.token);
       toast.success('¡Bienvenido!');
-      router.push('/');
+      const redirectTo = searchParams.get('redirect') || '/';
+      router.push(redirectTo);
     } catch (error) {
       toast.error(error.response?.data?.message || 'Error al iniciar sesión');
     } finally {

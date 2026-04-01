@@ -17,7 +17,7 @@ export default function CartPage() {
   const handleCheckout = () => {
     if (!user) {
       toast.error('Debés iniciar sesión para continuar');
-      router.push('/login');
+      router.push('/login?redirect=/checkout');
       return;
     }
     router.push('/checkout');

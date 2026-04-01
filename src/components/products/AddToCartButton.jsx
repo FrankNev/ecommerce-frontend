@@ -1,21 +1,23 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { toast } from 'sonner';
 import useCartStore from '@/store/useCartStore';
 import useAuthStore from '@/store/useAuthStore';
+import { Button } from '@/components/ui/button';
 
 export default function AddToCartButton({ product }) {
   const [quantity, setQuantity] = useState(1);
   const addItem = useCartStore(state => state.addItem);
   const user = useAuthStore(state => state.user);
   const router = useRouter();
+  const pathname = usePathname();
 
   const handleAdd = () => {
     if (!user) {
       toast.error('Debés iniciar sesión para agregar al carrito');
-      router.push('/login');
+      router.push(`/login?redirect=${pathname}`);
       return;
     }
     if (product.stock === 0) {
@@ -47,13 +49,13 @@ export default function AddToCartButton({ product }) {
         </div>
       </div>
 
-      <button
+      <Button
         onClick={handleAdd}
         disabled={product.stock === 0}
-        className="w-full bg-black text-white py-3 rounded-xl font-semibold hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full"
       >
         {product.stock === 0 ? 'Sin stock' : 'Agregar al carrito'}
-      </button>
+      </Button>
     </div>
   );
 }
