@@ -14,13 +14,10 @@ async function getProducts(searchParams) {
       if (value) params.set(key, value);
     });
     const url = `${process.env.NEXT_PUBLIC_ECOMMERCE_API_URL}/api/products?${params.toString()}`;
-    console.log('Fetching:', url);
     const res = await fetch(url, { cache: 'no-store' });
     const data = await res.json();
-    console.log('Response:', JSON.stringify(data));
     return data;
   } catch (error) {
-    console.error('Error:', error);
     return { products: [], total: 0, pages: 1, currentPage: 1 };
   }
 }
