@@ -19,6 +19,7 @@ export default function NewProductPage() {
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState([]);
   const [attributes, setAttributes] = useState([{ key: '', value: '' }]);
+  const [variants, setVariants] = useState([]);
   const [form, setForm] = useState({
     name: '', description: '', price: '', stock: '', category_id: '',
   });
@@ -47,6 +48,38 @@ export default function NewProductPage() {
     setAttributes(attributes.filter((_, i) => i !== index));
   };
 
+  const addVariant = () => {
+    setVariants([...variants, { name: '', price: '', stock: '', attributes: [{ key: '', value: '' }] }]);
+  };
+
+  const removeVariant = (index) => {
+    setVariants(variants.filter((_, i) => i !== index));
+  };
+
+  const updateVariant = (index, field, value) => {
+    const updated = [...variants];
+    updated[index][field] = value;
+    setVariants(updated);
+  };
+
+  const addVariantAttribute = (variantIndex) => {
+    const updated = [...variants];
+    updated[variantIndex].attributes.push({ key: '', value: '' });
+    setVariants(updated);
+  };
+
+  const updateVariantAttribute = (variantIndex, attrIndex, field, value) => {
+    const updated = [...variants];
+    updated[variantIndex].attributes[attrIndex][field] = value;
+    setVariants(updated);
+  };
+
+  const removeVariantAttribute = (variantIndex, attrIndex) => {
+    const updated = [...variants];
+    updated[variantIndex].attributes = updated[variantIndex].attributes.filter((_, i) => i !== attrIndex);
+    setVariants(updated);
+  };
+
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
     setImages(files);
@@ -69,6 +102,14 @@ export default function NewProductPage() {
       formData.append('attributes', JSON.stringify(attributesObj));
 
       images.forEach(img => formData.append('images', img));
+
+      const formattedVariants = variants.map(v => ({
+        name: v.name,
+        price: Number(v.price),
+        stock: Number(v.stock),
+        attributes: Object.fromEntries(v.attributes.filter(a => a.key.trim()).map(a => [a.key.trim(), a.value.trim()])),
+      }));
+      formData.append('variants', JSON.stringify(formattedVariants));
 
       await ecommerceAPI.post('/api/products', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
@@ -171,6 +212,103 @@ export default function NewProductPage() {
                       ✕
                     </Button>
                   )}
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <CardTitle>Variantes</CardTitle>
+                <Button type="button" variant="outline" size="sm" onClick={addVariant}>
+                  + Agregar variante
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {variants.length === 0 && (
+                <p className="text-sm text-gray-400 text-center py-4">
+                  Sin variantes — el producto tendrá un único precio y stock
+                </p>
+              )}
+              {variants.map((variant, vIndex) => (
+                <div key={vIndex} className="border border-gray-200 rounded-xl p-4 space-y-4">
+                  <div className="flex justify-between items-center">
+                    <p className="text-sm font-semibold text-gray-700">Variante {vIndex + 1}</p>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="text-red-400 hover:text-red-600"
+                      onClick={() => removeVariant(vIndex)}
+                    >✕</Button>
+                  </div>
+
+                  <div className="space-y-1">
+                    <Label>Nombre de la variante</Label>
+                    <Input
+                      placeholder="Ej: Negro 128GB"
+                      value={variant.name}
+                      onChange={(e) => updateVariant(vIndex, 'name', e.target.value)}
+                    />
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div className="space-y-1">
+                      <Label>Precio</Label>
+                      <Input
+                        type="number"
+                        placeholder="999999"
+                        value={variant.price}
+                        onChange={(e) => updateVariant(vIndex, 'price', e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label>Stock</Label>
+                      <Input
+                        type="number"
+                        placeholder="10"
+                        value={variant.stock}
+                        onChange={(e) => updateVariant(vIndex, 'stock', e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <Label>Atributos</Label>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => addVariantAttribute(vIndex)}
+                      >+ Atributo</Button>
+                    </div>
+                    {variant.attributes.map((attr, aIndex) => (
+                      <div key={aIndex} className="flex gap-2 items-center">
+                        <Input
+                          placeholder="Ej: Color"
+                          value={attr.key}
+                          onChange={(e) => updateVariantAttribute(vIndex, aIndex, 'key', e.target.value)}
+                        />
+                        <Input
+                          placeholder="Ej: Negro"
+                          value={attr.value}
+                          onChange={(e) => updateVariantAttribute(vIndex, aIndex, 'value', e.target.value)}
+                        />
+                        {variant.attributes.length > 1 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="text-red-400 hover:text-red-600 shrink-0"
+                            onClick={() => removeVariantAttribute(vIndex, aIndex)}
+                          >✕</Button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ))}
             </CardContent>
