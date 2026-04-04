@@ -4,10 +4,6 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <h3 className="text-white font-bold text-lg mb-4">Mi Tienda</h3>
-            <p className="text-sm">La mejor tienda online de electrónica con los mejores precios.</p>
-          </div>
-          <div>
             <h4 className="text-white font-semibold mb-4">Links</h4>
             <ul className="space-y-2 text-sm">
               <li><a href="/products" className="hover:text-white transition">Productos</a></li>

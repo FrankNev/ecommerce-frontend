@@ -41,6 +41,7 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full bg-white border-b shadow-sm">
 
+      {/* ── NIVEL 1: Logo + Búsqueda + Acciones ── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-4">
 
@@ -49,6 +50,7 @@ export default function Navbar() {
             Mi Tienda
           </Link>
 
+          {/* Barra de búsqueda — solo desktop */}
           <form
             onSubmit={handleSearch}
             className="hidden md:flex flex-1 max-w-xl items-center border border-gray-300 rounded-full px-4 py-2 gap-2 hover:border-gray-500 transition-colors"
@@ -209,6 +211,7 @@ export default function Navbar() {
         </div>
       </div>
 
+      {/* ── NIVEL 2: Categorías + Links secundarios — solo desktop ── */}
       <div className="hidden md:block border-t bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex items-center justify-between h-11">
@@ -223,7 +226,7 @@ export default function Navbar() {
               </Link>
             </div>
 
-
+            {/* Links secundarios derecha */}
             <div className="flex items-center gap-6">
               {mounted && user?.role === 'admin' && (
                 <Link href="/admin" className="text-sm text-gray-600 hover:text-black transition-colors font-medium flex items-center gap-1">

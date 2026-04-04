@@ -10,11 +10,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 
 export default function NewProductPage() {
   const router = useRouter();
   const user = useAuthStore(state => state.user);
+  const [previews, setPreviews] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState([]);
@@ -47,6 +47,13 @@ export default function NewProductPage() {
     setAttributes(attributes.filter((_, i) => i !== index));
   };
 
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    setImages(files);
+    const urls = files.map(file => URL.createObjectURL(file));
+    setPreviews(urls);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -54,7 +61,7 @@ export default function NewProductPage() {
       const formData = new FormData();
       Object.entries(form).forEach(([key, value]) => formData.append(key, value));
 
-      // Convertir atributos al formato JSON
+      // Convertir atributos a formato JSON
       const attributesObj = {};
       attributes.forEach(({ key, value }) => {
         if (key.trim()) attributesObj[key.trim()] = value.trim();
@@ -166,27 +173,61 @@ export default function NewProductPage() {
                   )}
                 </div>
               ))}
-              <p className="text-xs text-gray-400">Ejemplo: RAM → 8GB, Almacenamiento → 256GB</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader><CardTitle>Imágenes</CardTitle></CardHeader>
-            <CardContent className="space-y-3">
-              <input
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={(e) => setImages(Array.from(e.target.files))}
-                className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-black file:text-white hover:file:bg-gray-800"
-              />
-              {images.length > 0 && (
-                <div className="flex gap-2 flex-wrap">
-                  {images.map((img, i) => (
-                    <Badge key={i} variant="secondary">{img.name}</Badge>
+            <CardContent className="space-y-4">
+
+              {/* Previews de imágenes seleccionadas */}
+              {previews.length > 0 && (
+                <div className="space-y-3">
+                  {previews.map((url, i) => (
+                    <div key={i} className="flex items-center gap-4 p-3 border border-gray-200 rounded-lg">
+                      <img
+                        src={url}
+                        alt={`Preview ${i + 1}`}
+                        style={{ width: '64px', height: '64px', objectFit: 'cover' }}
+                        className="rounded-lg"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-700 truncate">{images[i]?.name}</p>
+                        <p className="text-xs text-gray-400">{(images[i]?.size / 1024).toFixed(0)} KB</p>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-400 hover:text-red-600 shrink-0"
+                        onClick={() => {
+                          const newImages = images.filter((_, idx) => idx !== i);
+                          const newPreviews = previews.filter((_, idx) => idx !== i);
+                          setImages(newImages);
+                          setPreviews(newPreviews);
+                        }}
+                      >
+                        ✕
+                      </Button>
+                    </div>
                   ))}
                 </div>
               )}
+
+              {/* Botón para agregar imágenes */}
+              <label className="flex items-center justify-center gap-2 w-full border-2 border-dashed border-gray-200 rounded-lg p-6 cursor-pointer hover:border-gray-400 transition-colors">
+                <span className="text-sm text-gray-500">
+                  {previews.length > 0 ? '+ Agregar más imágenes' : 'Seleccionar imágenes'}
+                </span>
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="hidden"
+                />
+              </label>
+
             </CardContent>
           </Card>
 

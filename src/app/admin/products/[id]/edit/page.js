@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 
 export default function EditProductPage({ params }) {
   const router = useRouter();
@@ -19,6 +18,9 @@ export default function EditProductPage({ params }) {
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [images, setImages] = useState([]);
+  const [existingImages, setExistingImages] = useState([]);
+  const [previews, setPreviews] = useState([]);
+  const [deletingImage, setDeletingImage] = useState(null);
   const [mounted, setMounted] = useState(false);
   const [attributes, setAttributes] = useState([{ key: '', value: '' }]);
   const [form, setForm] = useState({
@@ -45,12 +47,11 @@ export default function EditProductPage({ params }) {
         stock: data.stock,
         category_id: data.category_id,
       });
-
-      // Convertir atributos de Map a array de pares
       if (data.attributes) {
         const attrs = Object.entries(data.attributes).map(([key, value]) => ({ key, value }));
         setAttributes(attrs.length > 0 ? attrs : [{ key: '', value: '' }]);
       }
+      setExistingImages(data.images || []);
     } catch (error) {
       toast.error('Error al cargar producto');
     } finally {
@@ -64,6 +65,30 @@ export default function EditProductPage({ params }) {
     const updated = [...attributes];
     updated[index][field] = value;
     setAttributes(updated);
+  };
+
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    setImages(files);
+    const urls = files.map(file => URL.createObjectURL(file));
+    setPreviews(urls);
+  };
+
+  const handleDeleteExistingImage = async (publicId, index) => {
+    if (!confirm('¿Eliminár esta imagen?')) return;
+    setDeletingImage(index);
+    try {
+      const { id } = await params;
+      await ecommerceAPI.delete(`/api/products/${id}/images`, {
+        data: { public_id: publicId },
+      });
+      setExistingImages(existingImages.filter((_, i) => i !== index));
+      toast.success('Imagen eliminada');
+    } catch (error) {
+      toast.error('Error al eliminar imagen');
+    } finally {
+      setDeletingImage(null);
+    }
   };
 
   const addAttribute = () => setAttributes([...attributes, { key: '', value: '' }]);
@@ -202,22 +227,84 @@ export default function EditProductPage({ params }) {
 
           <Card>
             <CardHeader><CardTitle>Imágenes</CardTitle></CardHeader>
-            <CardContent className="space-y-3">
-              <p className="text-sm text-gray-500">Subí nuevas imágenes para reemplazar las actuales</p>
-              <input
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={(e) => setImages(Array.from(e.target.files))}
-                className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-black file:text-white hover:file:bg-gray-800"
-              />
-              {images.length > 0 && (
-                <div className="flex gap-2 flex-wrap">
-                  {images.map((img, i) => (
-                    <Badge key={i} variant="secondary">{img.name}</Badge>
+            <CardContent className="space-y-4">
+
+              {/* Imágenes existentes en Cloudinary */}
+              {existingImages.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-gray-700">Imágenes actuales</p>
+                  {existingImages.map((img, i) => (
+                    <div key={i} className="flex items-center gap-4 p-3 border border-gray-200 rounded-lg">
+                      <img
+                        src={img.url}
+                        alt={`Imagen ${i + 1}`}
+                        style={{ width: '64px', height: '64px', objectFit: 'cover' }}
+                        className="rounded-lg"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-gray-400 truncate">{img.public_id}</p>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-400 hover:text-red-600 shrink-0"
+                        disabled={deletingImage === i}
+                        onClick={() => handleDeleteExistingImage(img.public_id, i)}
+                      >
+                        {deletingImage === i ? '...' : '✕'}
+                      </Button>
+                    </div>
                   ))}
                 </div>
               )}
+
+              {/* Previews de nuevas imágenes */}
+              {previews.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-gray-700">Nuevas imágenes</p>
+                  {previews.map((url, i) => (
+                    <div key={i} className="flex items-center gap-4 p-3 border border-dashed border-gray-200 rounded-lg">
+                      <img
+                        src={url}
+                        alt={`Preview ${i + 1}`}
+                        style={{ width: '64px', height: '64px', objectFit: 'cover' }}
+                        className="rounded-lg"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-700 truncate">{images[i]?.name}</p>
+                        <p className="text-xs text-gray-400">{(images[i]?.size / 1024).toFixed(0)} KB</p>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-400 hover:text-red-600 shrink-0"
+                        onClick={() => {
+                          setImages(images.filter((_, idx) => idx !== i));
+                          setPreviews(previews.filter((_, idx) => idx !== i));
+                        }}
+                      >
+                        ✕
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <label className="flex items-center justify-center gap-2 w-full border-2 border-dashed border-gray-200 rounded-lg p-6 cursor-pointer hover:border-gray-400 transition-colors">
+                <span className="text-sm text-gray-500">
+                  {previews.length > 0 || existingImages.length > 0 ? '+ Agregar más imágenes' : 'Seleccionar imágenes'}
+                </span>
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="hidden"
+                />
+              </label>
+
             </CardContent>
           </Card>
 
