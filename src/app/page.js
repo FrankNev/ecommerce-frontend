@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import HomepageCarousel from '@/components/home/HomepageCarousel';
 import BrandCard from '@/components/home/BrandCard';
 import FeaturesSection from '@/components/home/FeaturesSection';

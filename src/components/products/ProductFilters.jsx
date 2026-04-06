@@ -6,6 +6,7 @@ import { useState } from 'react';
 export default function ProductFilters({ categories }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [isOpen, setIsOpen] = useState(false);
 
   const [filters, setFilters] = useState({
     search: searchParams.get('search') || '',
@@ -29,91 +30,119 @@ export default function ProductFilters({ categories }) {
   };
 
   const handleReset = () => {
-    setFilters({ search: '', category: '', minPrice: '', maxPrice: '' });
+    setFilters({ search: '', category: '', brand: '', minPrice: '', maxPrice: '' });
     router.push('/products');
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-5 shadow-sm space-y-5">
-      <h2 className="font-bold text-gray-900">Filtros</h2>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
-        <input
-          type="text"
-          name="search"
-          value={filters.search}
-          onChange={handleChange}
-          placeholder="Nombre del producto..."
-          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
-        <select
-          name="category"
-          value={filters.category}
-          onChange={handleChange}
-          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+    <div className="bg-white rounded-2xl shadow-sm">
+      {/* Botón de toggle solo visible en móviles */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full md:hidden flex items-center justify-between p-5 font-semibold text-gray-900 border-b border-gray-200"
+      >
+        <span>Filtros</span>
+        <svg
+          className={`w-5 h-5 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
         >
-          <option value="">Todas</option>
-          {categories.map(cat => (
-            <option key={cat.id} value={cat.id}>{cat.name}</option>
-          ))}
-        </select>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Marca</label>
-        <input
-          type="text"
-          name="brand"
-          value={filters.brand}
-          onChange={handleChange}
-          placeholder="Apple, Samsung..."
-          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Precio mínimo</label>
-        <input
-          type="number"
-          name="minPrice"
-          value={filters.minPrice}
-          onChange={handleChange}
-          placeholder="$ 0"
-          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Precio máximo</label>
-        <input
-          type="number"
-          name="maxPrice"
-          value={filters.maxPrice}
-          onChange={handleChange}
-          placeholder="$ 999999"
-          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
-        />
-      </div>
-
-      <button
-        type="submit"
-        className="w-full bg-black text-white py-2 rounded-lg text-sm font-semibold hover:bg-gray-800 transition"
-      >
-        Aplicar filtros
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+        </svg>
       </button>
 
-      <button
-        type="button"
-        onClick={handleReset}
-        className="w-full bg-gray-100 text-gray-700 py-2 rounded-lg text-sm font-semibold hover:bg-gray-200 transition"
+      {/* Encabezado visible solo en escritorio */}
+      <div className="hidden md:block p-5 pb-0">
+        <h2 className="font-bold text-gray-900 mb-5">Filtros</h2>
+      </div>
+
+      {/* Contenido del formulario - replegable en móviles */}
+      <form
+        onSubmit={handleSubmit}
+        className={`transition-all duration-300 overflow-hidden ${isOpen ? 'max-h-[1000px] md:max-h-none' : 'max-h-0 md:max-h-none'
+          } md:block`}
       >
-        Limpiar filtros
-      </button>
-    </form>
+        <div className="p-5 space-y-5">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
+            <input
+              type="text"
+              name="search"
+              value={filters.search}
+              onChange={handleChange}
+              placeholder="Nombre del producto..."
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+            <select
+              name="category"
+              value={filters.category}
+              onChange={handleChange}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+            >
+              <option value="">Todas</option>
+              {categories.map(cat => (
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Marca</label>
+            <input
+              type="text"
+              name="brand"
+              value={filters.brand}
+              onChange={handleChange}
+              placeholder="Apple, Samsung..."
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Precio mínimo</label>
+            <input
+              type="number"
+              name="minPrice"
+              value={filters.minPrice}
+              onChange={handleChange}
+              placeholder="$ 0"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Precio máximo</label>
+            <input
+              type="number"
+              name="maxPrice"
+              value={filters.maxPrice}
+              onChange={handleChange}
+              placeholder="$ 999999"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-black text-white py-2 rounded-lg text-sm font-semibold hover:bg-gray-800 transition"
+          >
+            Aplicar filtros
+          </button>
+
+          <button
+            type="button"
+            onClick={handleReset}
+            className="w-full bg-gray-100 text-gray-700 py-2 rounded-lg text-sm font-semibold hover:bg-gray-200 transition"
+          >
+            Limpiar filtros
+          </button>
+        </div>
+      </form>
+    </div>
   );
 }

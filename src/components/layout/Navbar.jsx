@@ -71,11 +71,11 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-1">
 
             {/* Carrito */}
-            <Button variant="ghost" size="icon" asChild className="relative">
+            <Button variant="ghost" size="icon" asChild className="relative mx-1">
               <Link href="/cart">
                 <ShoppingCart size={22} />
                 {mounted && count > 0 && (
-                  <Badge className="absolute -top-1 -right-1 px-1 min-w-[1.25rem] h-5 flex items-center justify-center text-[10px]">
+                  <Badge className="absolute bg-red-500 -top-1 -right-1 px-1 min-w-[1rem] h-4 flex items-center justify-center text-[10px]">
                     {count}
                   </Badge>
                 )}
@@ -172,6 +172,10 @@ export default function Navbar() {
                   <Link href="/products">Productos</Link>
                 </DropdownMenuItem>
 
+                <DropdownMenuItem asChild className="p-3 text-sm cursor-pointer">
+                  <Link href="/contact">Contacto</Link>
+                </DropdownMenuItem>
+
                 <DropdownMenuSeparator />
 
                 {mounted && (
@@ -207,7 +211,6 @@ export default function Navbar() {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-
         </div>
       </div>
 
@@ -228,10 +231,16 @@ export default function Navbar() {
 
             {/* Links secundarios derecha */}
             <div className="flex items-center gap-6">
-              {mounted && user?.role === 'admin' && (
-                <Link href="/admin" className="text-sm text-gray-600 hover:text-black transition-colors font-medium flex items-center gap-1">
-                  <Shield size={14} /> Panel Admin
-                </Link>
+              {mounted && (
+                user?.role === 'admin' ? (
+                  <Link href="/admin" className="text-sm text-gray-600 hover:text-black transition-colors font-medium flex items-center gap-1">
+                    <Shield size={14} /> Panel Admin
+                  </Link>
+                ) : (
+                  <Link href="/contacto" className="text-sm text-gray-600 hover:text-black transition-colors font-medium flex items-center gap-1">
+                    Contacto
+                  </Link>
+                )
               )}
             </div>
 

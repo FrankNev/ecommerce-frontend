@@ -16,11 +16,11 @@ const FAQS = [
   },
   {
     question: '¿Los productos tienen garantía?',
-    answer: 'Todos nuestros productos tienen garantía oficial del fabricante. Adicionalmente ofrecemos 30 días de garantía de satisfacción.',
+    answer: 'Todos nuestros productos tienen garantía oficial del fabricante. Adicionalmente ofrecemos 7 días de garantía de satisfacción.',
   },
   {
     question: '¿Puedo devolver un producto?',
-    answer: 'Sí, aceptamos devoluciones dentro de los 30 días de recibido el producto, siempre que esté en su estado original con todos sus accesorios.',
+    answer: 'Sí, aceptamos devoluciones dentro de los 7 días de recibido el producto, siempre que esté en su estado original con todos sus accesorios.',
   },
   {
     question: '¿Los precios incluyen IVA?',
