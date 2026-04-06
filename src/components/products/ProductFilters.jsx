@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 export default function ProductFilters({ categories }) {
   const router = useRouter();
@@ -10,6 +10,7 @@ export default function ProductFilters({ categories }) {
   const [filters, setFilters] = useState({
     search: searchParams.get('search') || '',
     category: searchParams.get('category') || '',
+    brand: searchParams.get('brand') || '',
     minPrice: searchParams.get('minPrice') || '',
     maxPrice: searchParams.get('maxPrice') || '',
   });
@@ -61,6 +62,18 @@ export default function ProductFilters({ categories }) {
             <option key={cat.id} value={cat.id}>{cat.name}</option>
           ))}
         </select>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Marca</label>
+        <input
+          type="text"
+          name="brand"
+          value={filters.brand}
+          onChange={handleChange}
+          placeholder="Apple, Samsung..."
+          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+        />
       </div>
 
       <div>

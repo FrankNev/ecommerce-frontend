@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 const useCartStore = create(
   persist(
@@ -8,33 +8,40 @@ const useCartStore = create(
 
       addItem: (product, quantity = 1) => {
         const items = get().items;
-        const existing = items.find(i => i.product._id === product._id);
+        const itemKey = product.selectedVariant
+          ? `${product._id}_${product.selectedVariant._id}`
+          : product._id;
+
+        const existing = items.find(i => i.itemKey === itemKey);
+        const maxStock = product.selectedVariant?.stock ?? product.stock;
 
         if (existing) {
+          const newQty = Math.min(existing.quantity + quantity, maxStock);
           set({
             items: items.map(i =>
-              i.product._id === product._id
-                ? { ...i, quantity: i.quantity + quantity }
-                : i
+              i.itemKey === itemKey ? { ...i, quantity: newQty } : i
             ),
           });
         } else {
-          set({ items: [...items, { product, quantity }] });
+          set({ items: [...items, { itemKey, product, quantity: Math.min(quantity, maxStock) }] });
         }
       },
 
-      removeItem: (productId) => {
-        set({ items: get().items.filter(i => i.product._id !== productId) });
+      removeItem: (itemKey) => {
+        set({ items: get().items.filter(i => i.itemKey !== itemKey) });
       },
 
-      updateQuantity: (productId, quantity) => {
+      updateQuantity: (itemKey, quantity) => {
         if (quantity <= 0) {
-          get().removeItem(productId);
+          get().removeItem(itemKey);
           return;
         }
+        const item = get().items.find(i => i.itemKey === itemKey);
+        if (!item) return;
+        const maxStock = item.product.selectedVariant?.stock ?? item.product.stock;
         set({
           items: get().items.map(i =>
-            i.product._id === productId ? { ...i, quantity } : i
+            i.itemKey === itemKey ? { ...i, quantity: Math.min(quantity, maxStock) } : i
           ),
         });
       },
@@ -42,16 +49,20 @@ const useCartStore = create(
       clearCart: () => set({ items: [] }),
 
       getTotal: () => {
-        return get().items.reduce(
-          (total, item) => total + item.product.price * item.quantity, 0
-        );
+        return get().items.reduce((total, item) => {
+          const price = item.product.selectedVariant?.price ?? item.product.price;
+          return total + price * item.quantity;
+        }, 0);
       },
 
       getCount: () => {
         return get().items.reduce((count, item) => count + item.quantity, 0);
       },
     }),
-    { name: 'cart-storage' }
+    {
+      name: 'cart-storage',
+      storage: createJSONStorage(() => sessionStorage),
+    }
   )
 );
 

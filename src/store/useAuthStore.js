@@ -11,6 +11,7 @@ const useAuthStore = create((set) => ({
   logout: () => {
     sessionStorage.removeItem('token');
     sessionStorage.removeItem('user');
+    sessionStorage.removeItem('cart-storage');
     set({ user: null, token: null });
   },
   hydrate: () => {

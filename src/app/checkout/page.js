@@ -188,17 +188,17 @@ export default function CheckoutPage() {
           <CardContent className="space-y-4">
 
             <div className="space-y-3">
-              {items.map(({ product, quantity, selectedVariant }) => (
-                <div key={product._id} className="flex justify-between text-sm">
+              {items.map(({ product, quantity, itemKey }) => (
+                <div key={itemKey} className="flex justify-between text-sm">
                   <div className="text-gray-600 truncate mr-2">
                     <p className="font-medium">{product.name}</p>
-                    {selectedVariant && (
-                      <p className="text-xs text-gray-400">{selectedVariant.name}</p>
+                    {product.selectedVariant && (
+                      <p className="text-xs text-gray-400">{product.selectedVariant.name}</p>
                     )}
                     <p className="text-xs text-gray-400">x{quantity}</p>
                   </div>
                   <span className="font-medium shrink-0">
-                    ${((selectedVariant?.price || product.price) * quantity).toLocaleString('es-AR')}
+                    ${((product.selectedVariant?.price ?? product.price) * quantity).toLocaleString('es-AR')}
                   </span>
                 </div>
               ))}

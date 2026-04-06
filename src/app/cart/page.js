@@ -42,8 +42,8 @@ export default function CartPage() {
 
         {/* Items */}
         <div className="lg:col-span-2 space-y-4">
-          {items.map(({ product, quantity }) => (
-            <Card key={product._id}>
+          {items.map(({ product, quantity, itemKey }) => (
+            <Card key={itemKey}>
               <CardContent className="p-5 flex gap-5">
                 <div style={{ position: 'relative', height: '96px', width: '96px', overflow: 'hidden' }}
                   className="bg-gray-100 rounded-xl shrink-0">
@@ -60,32 +60,35 @@ export default function CartPage() {
 
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-gray-900 truncate">{product.name}</h3>
+                  {/* Mostrar variante seleccionada */}
+                  {product.selectedVariant && (
+                    <p className="text-sm text-gray-500">{product.selectedVariant.name}</p>
+                  )}
                   <p className="text-gray-500 text-sm mt-1">
-                    ${product.price.toLocaleString('es-AR')} c/u
+                    ${(product.selectedVariant?.price ?? product.price).toLocaleString('es-AR')} c/u
                   </p>
 
                   <div className="flex items-center justify-between mt-3">
                     <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
                       <button
-                        onClick={() => updateQuantity(product._id, Math.max(1, quantity - 1))}
+                        onClick={() => updateQuantity(itemKey, Math.max(1, quantity - 1))}
                         className="px-3 py-1.5 text-gray-600 hover:bg-gray-100 transition text-sm"
                       >−</button>
                       <span className="px-3 py-1.5 text-sm font-medium">{quantity}</span>
                       <button
-                        onClick={() => updateQuantity(product._id, quantity + 1)}
+                        onClick={() => updateQuantity(itemKey, quantity + 1)}
                         className="px-3 py-1.5 text-gray-600 hover:bg-gray-100 transition text-sm"
                       >+</button>
                     </div>
 
                     <div className="flex items-center gap-4">
                       <p className="font-bold text-gray-900">
-                        ${(product.price * quantity).toLocaleString('es-AR')}
+                        ${((product.selectedVariant?.price ?? product.price) * quantity).toLocaleString('es-AR')}
                       </p>
                       <Button
-                        variant="ghost"
-                        size="sm"
+                        variant="ghost" size="sm"
                         className="text-red-400 hover:text-red-600"
-                        onClick={() => removeItem(product._id)}
+                        onClick={() => removeItem(itemKey)}
                       >
                         Eliminar
                       </Button>
@@ -106,10 +109,14 @@ export default function CartPage() {
           <CardHeader><CardTitle>Resumen</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2 text-sm">
-              {items.map(({ product, quantity }) => (
-                <div key={product._id} className="flex justify-between text-gray-500">
-                  <span className="truncate mr-2">{product.name} x{quantity}</span>
-                  <span>${(product.price * quantity).toLocaleString('es-AR')}</span>
+              {items.map(({ product, quantity, itemKey }) => (
+                <div key={itemKey} className="flex justify-between text-gray-500">
+                  <span className="truncate mr-2">
+                    {product.name}
+                    {product.selectedVariant && ` (${product.selectedVariant.name})`}
+                    {` x${quantity}`}
+                  </span>
+                  <span>${((product.selectedVariant?.price ?? product.price) * quantity).toLocaleString('es-AR')}</span>
                 </div>
               ))}
             </div>

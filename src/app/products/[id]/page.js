@@ -120,7 +120,9 @@ export default async function ProductDetailPage({ params }) {
         <div className="space-y-4">
           <h2 className="text-xl font-bold text-gray-900">Descripción</h2>
           <Separator />
-          <p className="text-gray-600 leading-relaxed">{product.description}</p>
+          <p className="text-gray-600 leading-relaxed whitespace-pre-line">
+            {product.description}
+          </p>
         </div>
 
         {product.attributes && Object.keys(product.attributes).length > 0 && (
