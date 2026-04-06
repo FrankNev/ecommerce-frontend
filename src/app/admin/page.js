@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 const STATUS_LABELS = {
   pending: { label: 'Pendiente', variant: 'secondary' },
@@ -36,6 +37,8 @@ export default function AdminPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditingId, setIsEditingId] = useState(null);
   const [categoryForm, setCategoryForm] = useState({ name: '', description: '' });
+  const [expandedOrderId, setExpandedOrderId] = useState(null);
+  const [searchOrder, setSearchOrder] = useState('');
   const user = useAuthStore(state => state.user);
   const router = useRouter();
 
@@ -85,6 +88,26 @@ export default function AdminPage() {
       toast.error('Error al actualizar estado');
     }
   };
+
+  const handleDeleteOrder = async (orderId) => {
+    if (!confirm('¿Estás seguro de eliminar esta orden? Esta acción no se puede deshacer.')) return;
+    try {
+      await ecommerceAPI.delete(`/api/orders/${orderId}`);
+      setOrders(orders.filter(o => o.id !== orderId));
+      setExpandedOrderId(null);
+      toast.success('Orden eliminada');
+    } catch (error) {
+      toast.error('Error al eliminar orden');
+    }
+  };
+
+  const filteredOrders = orders.filter(order => {
+    const searchTerm = searchOrder.toLowerCase();
+    return (
+      order.id.toString().includes(searchTerm) ||
+      order.user_email.toLowerCase().includes(searchTerm)
+    );
+  });
 
   const handleOpenDialog = (category = null) => {
     if (category) {
@@ -216,40 +239,198 @@ export default function AdminPage() {
           {/* Tab Órdenes */}
           <TabsContent value="orders">
             <Card>
-              <CardHeader><CardTitle>Órdenes</CardTitle></CardHeader>
+              <CardHeader>
+                <CardTitle>Órdenes</CardTitle>
+                <div className="mt-4">
+                  <Input
+                    placeholder="Buscar por número de orden o email..."
+                    value={searchOrder}
+                    onChange={(e) => setSearchOrder(e.target.value)}
+                    className="max-w-sm"
+                  />
+                </div>
+              </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Orden</TableHead>
-                      <TableHead>Cliente</TableHead>
-                      <TableHead>Total</TableHead>
-                      <TableHead>Estado</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {orders.map(order => (
-                      <TableRow key={order.id}>
-                        <TableCell className="font-medium">#{order.id}</TableCell>
-                        <TableCell>{order.user_email}</TableCell>
-                        <TableCell>${Number(order.total).toLocaleString('es-AR')}</TableCell>
-                        <TableCell>
-                          <select
-                            value={order.status}
-                            onChange={(e) => handleUpdateOrderStatus(order.id, e.target.value)}
-                            className="border border-gray-200 rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-black"
-                          >
-                            <option value="pending">Pendiente</option>
-                            <option value="confirmed">Confirmado</option>
-                            <option value="shipped">Enviado</option>
-                            <option value="delivered">Entregado</option>
-                            <option value="cancelled">Cancelado</option>
-                          </select>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                <div className="space-y-3">
+                  {filteredOrders.length === 0 ? (
+                    <p className="text-center text-gray-500 py-8">No hay órdenes que coincidan con la búsqueda</p>
+                  ) : (
+                    filteredOrders.map(order => (
+                      <div key={order.id} className="border border-gray-200 rounded-lg">
+                        <button
+                          onClick={() => setExpandedOrderId(expandedOrderId === order.id ? null : order.id)}
+                          className="w-full flex items-center justify-between p-4 hover:bg-gray-50"
+                        >
+                          <div className="flex items-center gap-4 flex-1 text-left">
+                            <div className="flex-1">
+                              <p className="font-medium">Orden #{order.id}</p>
+                              <p className="text-sm text-gray-500">{order.user_email}</p>
+                            </div>
+                            <div className="flex items-center gap-6">
+                              <div>
+                                <p className="text-sm text-gray-500">Total</p>
+                                <p className="font-semibold">${Number(order.total).toLocaleString('es-AR')}</p>
+                              </div>
+                              <select
+                                value={order.status}
+                                onChange={(e) => {
+                                  e.stopPropagation();
+                                  handleUpdateOrderStatus(order.id, e.target.value);
+                                }}
+                                className="border border-gray-200 rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-black"
+                              >
+                                <option value="pending">Pendiente</option>
+                                <option value="confirmed">Confirmado</option>
+                                <option value="shipped">Enviado</option>
+                                <option value="delivered">Entregado</option>
+                                <option value="cancelled">Cancelado</option>
+                              </select>
+                              {expandedOrderId === order.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                            </div>
+                          </div>
+                        </button>
+
+                        {/* Detalles expandidos */}
+                        {expandedOrderId === order.id && (
+                          <div className="border-t border-gray-200 bg-gray-50 p-4">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                              <div>
+                                <p className="text-xs font-semibold text-gray-500 uppercase">Fecha</p>
+                                <p className="text-sm">{new Date(order.created_at).toLocaleDateString('es-AR', {
+                                  year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                                })}</p>
+                              </div>
+                              <div>
+                                <p className="text-xs font-semibold text-gray-500 uppercase">Estado</p>
+                                <Badge variant="default" className="w-fit mt-1">
+                                  {STATUS_LABELS[order.status]?.label || order.status}
+                                </Badge>
+                              </div>
+                              <div>
+                                <p className="text-xs font-semibold text-gray-500 uppercase">Método de Pago</p>
+                                <Badge className="w-fit mt-1" variant={order.payment_method === 'transfer' ? 'secondary' : 'default'}>
+                                  {order.payment_method === 'transfer' ? 'Transferencia' : 'Mercado Pago'}
+                                </Badge>
+                              </div>
+                            </div>
+
+                            {/* Items de la orden */}
+                            <div className="mb-6">
+                              <p className="text-sm font-semibold mb-3">Productos ({order.items?.length || 0})</p>
+                              <div className="bg-white rounded border border-gray-200">
+                                <Table>
+                                  <TableHeader>
+                                    <TableRow>
+                                      <TableHead className="text-xs">Producto</TableHead>
+                                      <TableHead className="text-xs text-center">Cantidad</TableHead>
+                                      <TableHead className="text-xs text-right">Precio Unit.</TableHead>
+                                      <TableHead className="text-xs text-right">Subtotal</TableHead>
+                                    </TableRow>
+                                  </TableHeader>
+                                  <TableBody>
+                                    {order.items?.map((item, idx) => (
+                                      <TableRow key={idx} className="hover:bg-gray-50">
+                                        <TableCell className="text-sm">
+                                          <div>
+                                            <p className="font-medium">{item.product_name}</p>
+                                            {item.variant_name && <p className="text-xs text-gray-500">{item.variant_name}</p>}
+                                          </div>
+                                        </TableCell>
+                                        <TableCell className="text-sm text-center">{item.quantity}</TableCell>
+                                        <TableCell className="text-sm text-right">${Number(item.unit_price).toLocaleString('es-AR')}</TableCell>
+                                        <TableCell className="text-sm text-right font-semibold">
+                                          ${(item.unit_price * item.quantity).toLocaleString('es-AR')}
+                                        </TableCell>
+                                      </TableRow>
+                                    ))}
+                                  </TableBody>
+                                </Table>
+                              </div>
+                            </div>
+
+                            {/* Datos de envío en tabla */}
+                            {order.shipping_data && (
+                              <div className="mb-6">
+                                <p className="text-sm font-semibold mb-3">Datos de envío</p>
+                                <div className="bg-white rounded border border-gray-200 overflow-hidden">
+                                  <Table>
+                                    <TableBody>
+                                      {order.shipping_data.nombre && (
+                                        <TableRow className="hover:bg-gray-50">
+                                          <TableCell className="text-xs font-semibold text-gray-500 bg-gray-100">Nombre</TableCell>
+                                          <TableCell className="text-sm">{order.shipping_data.nombre}</TableCell>
+                                        </TableRow>
+                                      )}
+                                      {order.shipping_data.apellido && (
+                                        <TableRow className="hover:bg-gray-50">
+                                          <TableCell className="text-xs font-semibold text-gray-500 bg-gray-100">Apellido</TableCell>
+                                          <TableCell className="text-sm">{order.shipping_data.apellido}</TableCell>
+                                        </TableRow>
+                                      )}
+                                      {order.shipping_data.telefono && (
+                                        <TableRow className="hover:bg-gray-50">
+                                          <TableCell className="text-xs font-semibold text-gray-500 bg-gray-100">Teléfono</TableCell>
+                                          <TableCell className="text-sm">{order.shipping_data.telefono}</TableCell>
+                                        </TableRow>
+                                      )}
+                                      {order.shipping_data.direccion && (
+                                        <TableRow className="hover:bg-gray-50">
+                                          <TableCell className="text-xs font-semibold text-gray-500 bg-gray-100">Dirección</TableCell>
+                                          <TableCell className="text-sm">{order.shipping_data.direccion}</TableCell>
+                                        </TableRow>
+                                      )}
+                                      {order.shipping_data.numero && (
+                                        <TableRow className="hover:bg-gray-50">
+                                          <TableCell className="text-xs font-semibold text-gray-500 bg-gray-100">Número</TableCell>
+                                          <TableCell className="text-sm">{order.shipping_data.numero}</TableCell>
+                                        </TableRow>
+                                      )}
+                                      {order.shipping_data.piso && (
+                                        <TableRow className="hover:bg-gray-50">
+                                          <TableCell className="text-xs font-semibold text-gray-500 bg-gray-100">Piso</TableCell>
+                                          <TableCell className="text-sm">{order.shipping_data.piso}</TableCell>
+                                        </TableRow>
+                                      )}
+                                      {order.shipping_data.ciudad && (
+                                        <TableRow className="hover:bg-gray-50">
+                                          <TableCell className="text-xs font-semibold text-gray-500 bg-gray-100">Ciudad</TableCell>
+                                          <TableCell className="text-sm">{order.shipping_data.ciudad}</TableCell>
+                                        </TableRow>
+                                      )}
+                                      {order.shipping_data.provincia && (
+                                        <TableRow className="hover:bg-gray-50">
+                                          <TableCell className="text-xs font-semibold text-gray-500 bg-gray-100">Provincia</TableCell>
+                                          <TableCell className="text-sm">{order.shipping_data.provincia}</TableCell>
+                                        </TableRow>
+                                      )}
+                                      {order.shipping_data.codigo_postal && (
+                                        <TableRow className="hover:bg-gray-50">
+                                          <TableCell className="text-xs font-semibold text-gray-500 bg-gray-100">Código Postal</TableCell>
+                                          <TableCell className="text-sm">{order.shipping_data.codigo_postal}</TableCell>
+                                        </TableRow>
+                                      )}
+                                    </TableBody>
+                                  </Table>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Botón eliminar */}
+                            <div className="flex justify-end">
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => handleDeleteOrder(order.id)}
+                              >
+                                Eliminar orden
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
