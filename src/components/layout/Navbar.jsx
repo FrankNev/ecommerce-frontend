@@ -1,11 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { ShoppingCart, User, LogOut, Menu, Search, Shield, ClipboardList } from 'lucide-react';
+import { ShoppingCart, User, LogOut, Menu, Search, Shield, ClipboardList, ChevronDown } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import useAuthStore from '@/store/useAuthStore';
 import useCartStore from '@/store/useCartStore';
+import { ecommerceAPI } from '@/lib/axios';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -20,22 +21,42 @@ import {
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
   const [search, setSearch] = useState('');
+  const [categories, setCategories] = useState([]);
+  const [expandSearchDesktop, setExpandSearchDesktop] = useState(false);
+  const [expandSearchMobile, setExpandSearchMobile] = useState(false);
   const { user, logout } = useAuthStore();
   const count = useCartStore(state => state.getCount());
   const router = useRouter();
+  const searchInputRef = useRef(null);
 
   useEffect(() => setMounted(true), []);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const { data } = await ecommerceAPI.get('/api/categories');
+        setCategories(data);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+    if (mounted) fetchCategories();
+  }, [mounted]);
+
+  useEffect(() => {
+    if ((expandSearchDesktop || expandSearchMobile) && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [expandSearchDesktop, expandSearchMobile]);
 
   const handleSearch = (e) => {
     e.preventDefault();
     if (search.trim()) {
       router.push(`/products?search=${encodeURIComponent(search.trim())}`);
+      setSearch('');
+      setExpandSearchDesktop(false);
+      setExpandSearchMobile(false);
     }
-  };
-
-  const getUserInitial = () => {
-    if (user?.name) return user.name.charAt(0).toUpperCase();
-    return <User size={16} />;
   };
 
   return (
@@ -51,24 +72,40 @@ export default function Navbar() {
           </Link>
 
           {/* Barra de búsqueda — solo desktop */}
-          <form
-            onSubmit={handleSearch}
-            className="hidden md:flex flex-1 max-w-xl items-center border border-gray-300 rounded-full px-4 py-2 gap-2 hover:border-gray-500 transition-colors"
-          >
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar productos"
-              className="flex-1 text-sm outline-none bg-transparent text-gray-700 placeholder:text-gray-400"
-            />
-            <button type="submit" className="text-gray-500 hover:text-black transition-colors">
-              <Search size={18} />
-            </button>
-          </form>
+          {expandSearchDesktop ? (
+            <form
+              onSubmit={handleSearch}
+              className="hidden md:flex flex-1 max-w-xl items-center border border-gray-300 rounded-full px-4 py-2 gap-2 hover:border-gray-500 transition-colors"
+            >
+              <input
+                ref={searchInputRef}
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Buscar productos"
+                className="flex-1 text-sm outline-none bg-transparent text-gray-700 placeholder:text-gray-400"
+              />
+              <button type="submit" className="text-gray-500 hover:text-black transition-colors">
+                <Search size={18} />
+              </button>
+            </form>
+          ) : (
+            <div className="hidden md:flex flex-1" />
+          )}
 
           {/* Acciones desktop */}
           <div className="hidden md:flex items-center gap-1">
+
+            {/* Botón búsqueda */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setExpandSearchDesktop(!expandSearchDesktop)}
+              className="mx-1"
+            >
+              <Search size={22} />
+              <span className="sr-only">Buscar</span>
+            </Button>
 
             {/* Carrito */}
             <Button variant="ghost" size="icon" asChild className="relative mx-1">
@@ -91,7 +128,7 @@ export default function Navbar() {
                     <Button variant="ghost" className="relative h-9 w-9 rounded-full focus-visible:ring-0">
                       <Avatar className="h-9 w-9">
                         <AvatarFallback className="bg-black text-white font-semibold text-sm">
-                          {getUserInitial()}
+                          {user?.name?.charAt(0)?.toUpperCase() || <User size={16} />}
                         </AvatarFallback>
                       </Avatar>
                     </Button>
@@ -136,6 +173,16 @@ export default function Navbar() {
 
           {/* Acciones mobile */}
           <div className="flex md:hidden items-center gap-1">
+            {/* Botón búsqueda mobile */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setExpandSearchMobile(!expandSearchMobile)}
+            >
+              <Search size={22} />
+              <span className="sr-only">Buscar</span>
+            </Button>
+
             <Button variant="ghost" size="icon" asChild className="relative">
               <Link href="/cart">
                 <ShoppingCart size={22} />
@@ -154,23 +201,28 @@ export default function Navbar() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-64 p-2">
-                {/* Búsqueda mobile */}
-                <form onSubmit={handleSearch} className="flex items-center border border-gray-200 rounded-lg px-3 py-2 gap-2 mb-2">
-                  <input
-                    type="text"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Buscar productos"
-                    className="flex-1 text-sm outline-none bg-transparent"
-                  />
-                  <button type="submit"><Search size={16} className="text-gray-400" /></button>
-                </form>
-
                 <DropdownMenuSeparator />
 
                 <DropdownMenuItem asChild className="p-3 text-sm cursor-pointer">
-                  <Link href="/products">Productos</Link>
+                  <Link href="/products">Todos los productos</Link>
                 </DropdownMenuItem>
+
+                {/* Desplegable de categorías mobile */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <div className="p-3 text-sm cursor-pointer flex items-center justify-between hover:bg-gray-100 rounded">
+                      Categorías
+                      <ChevronDown size={16} />
+                    </div>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56">
+                    {categories.map((cat) => (
+                      <DropdownMenuItem asChild key={cat.id} className="cursor-pointer">
+                        <Link href={`/products?category=${cat.id}`}>{cat.name}</Link>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
 
                 <DropdownMenuItem asChild className="p-3 text-sm cursor-pointer">
                   <Link href="/contact">Contacto</Link>
@@ -224,9 +276,23 @@ export default function Navbar() {
               <Link href="/products" className="text-sm text-gray-600 hover:text-black transition-colors font-medium">
                 Todos los productos
               </Link>
-              <Link href="/products?category=1" className="text-sm text-gray-600 hover:text-black transition-colors font-medium">
-                Electrónica
-              </Link>
+
+              {/* Desplegable de categorías */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="text-sm text-gray-600 hover:text-black transition-colors font-medium flex items-center gap-2">
+                    Categorías
+                    <ChevronDown size={16} />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  {categories.map((cat) => (
+                    <DropdownMenuItem asChild key={cat.id} className="cursor-pointer">
+                      <Link href={`/products?category=${cat.id}`}>{cat.name}</Link>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             {/* Links secundarios derecha */}
@@ -237,7 +303,7 @@ export default function Navbar() {
                     <Shield size={14} /> Panel Admin
                   </Link>
                 ) : (
-                  <Link href="/contacto" className="text-sm text-gray-600 hover:text-black transition-colors font-medium flex items-center gap-1">
+                  <Link href="/contact" className="text-sm text-gray-600 hover:text-black transition-colors font-medium flex items-center gap-1">
                     Contacto
                   </Link>
                 )
@@ -247,6 +313,26 @@ export default function Navbar() {
           </nav>
         </div>
       </div>
+
+      {/* ── BÚSQUEDA EXPANDIDA MOBILE ── */}
+      {expandSearchMobile && (
+        <div className="md:hidden border-t bg-white px-4 py-3">
+          <form onSubmit={handleSearch} className="flex items-center border border-gray-200 rounded-lg px-3 py-2 gap-2">
+            <input
+              ref={searchInputRef}
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar productos"
+              className="flex-1 text-sm outline-none bg-transparent"
+              autoFocus
+            />
+            <button type="submit">
+              <Search size={18} className="text-gray-400" />
+            </button>
+          </form>
+        </div>
+      )}
 
     </header>
   );
