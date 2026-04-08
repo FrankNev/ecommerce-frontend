@@ -293,7 +293,7 @@ export default function AdminPage() {
                         {/* Detalles expandidos */}
                         {expandedOrderId === order.id && (
                           <div className="border-t border-gray-200 bg-gray-50 p-4">
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
                               <div>
                                 <p className="text-xs font-semibold text-gray-500 uppercase">Fecha</p>
                                 <p className="text-sm">{new Date(order.created_at).toLocaleDateString('es-AR', {
@@ -312,9 +312,13 @@ export default function AdminPage() {
                                   {order.payment_method === 'transfer' ? 'Transferencia' : 'Mercado Pago'}
                                 </Badge>
                               </div>
+                              <div>
+                                <p className="text-xs font-semibold text-gray-500 uppercase">Tipo de Envío</p>
+                                <Badge className="w-fit mt-1" variant={order.shipping_data?.shipping_type === 'pickup' ? 'secondary' : 'default'}>
+                                  {order.shipping_data?.shipping_type === 'pickup' ? 'Retiro en Local' : 'Envío a Domicilio'}
+                                </Badge>
+                              </div>
                             </div>
-
-                            {/* Items de la orden */}
                             <div className="mb-6">
                               <p className="text-sm font-semibold mb-3">Productos ({order.items?.length || 0})</p>
                               <div className="bg-white rounded border border-gray-200">

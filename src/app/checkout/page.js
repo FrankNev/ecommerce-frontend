@@ -27,6 +27,7 @@ export default function CheckoutPage() {
   const user = useAuthStore(state => state.user);
   const [loading, setLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('mercadopago');
+  const [shippingType, setShippingType] = useState('home');
   const [bankInfo, setBankInfo] = useState(null);
   const [mounted, setMounted] = useState(false);
   const [shipping, setShipping] = useState({
@@ -45,6 +46,9 @@ export default function CheckoutPage() {
   const handleChange = (e) => setShipping({ ...shipping, [e.target.name]: e.target.value });
 
   const validateShipping = () => {
+    // Para retiro en local, no necesita validar dirección
+    if (shippingType === 'pickup') return true;
+
     const required = ['nombre', 'apellido', 'telefono', 'direccion', 'numero', 'ciudad', 'provincia', 'codigo_postal'];
     for (const field of required) {
       if (!shipping[field].trim()) {
@@ -70,13 +74,18 @@ export default function CheckoutPage() {
 
     setLoading(true);
     try {
+      const shippingData = {
+        ...shipping,
+        shipping_type: shippingType,
+      };
+
       const { data: order } = await ecommerceAPI.post('/api/orders', {
         items: items.map(({ product, quantity, itemKey }) => ({
           product_id: product._id,
           quantity,
           variant_id: product.selectedVariant?._id || null,
         })),
-        shipping_data: shipping,
+        shipping_data: shippingData,
       });
 
       if (paymentMethod === 'mercadopago') {
@@ -197,7 +206,56 @@ export default function CheckoutPage() {
             </CardContent>
           </Card>
 
-          {/* Datos de envío */}
+          {/* Tipo de envío */}
+          <Card>
+            <CardHeader><CardTitle>Tipo de envío</CardTitle></CardHeader>
+            <CardContent className="space-y-3">
+              <div
+                onClick={() => setShippingType('home')}
+                className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition ${
+                  shippingType === 'home'
+                    ? 'border-black bg-gray-50'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                  shippingType === 'home' ? 'border-black' : 'border-gray-300'
+                }`}>
+                  {shippingType === 'home' && (
+                    <div className="w-2.5 h-2.5 rounded-full bg-black" />
+                  )}
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-gray-900">Envío a domicilio</p>
+                  <p className="text-sm text-gray-500">Entrega en tu dirección</p>
+                </div>
+              </div>
+
+              <div
+                onClick={() => setShippingType('pickup')}
+                className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition ${
+                  shippingType === 'pickup'
+                    ? 'border-black bg-gray-50'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                  shippingType === 'pickup' ? 'border-black' : 'border-gray-300'
+                }`}>
+                  {shippingType === 'pickup' && (
+                    <div className="w-2.5 h-2.5 rounded-full bg-black" />
+                  )}
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-gray-900">Retiro en local</p>
+                  <p className="text-sm text-gray-500">Retiralo en nuestro local</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Datos de envío - solo visible si es envío a domicilio */}
+          {shippingType === 'home' && (
           <Card>
             <CardHeader><CardTitle>Datos de envío</CardTitle></CardHeader>
             <CardContent className="space-y-4">
@@ -259,6 +317,7 @@ export default function CheckoutPage() {
               </div>
             </CardContent>
           </Card>
+          )}
 
           {/* Datos del comprador */}
           <Card>
