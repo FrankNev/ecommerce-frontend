@@ -18,6 +18,13 @@ export default function Footer() {
               <li>+54 11 1234-5678</li>
             </ul>
           </div>
+          <div>
+            <h4 className="text-white font-semibold mb-4">Redes sociales</h4>
+            <ul className="space-y-2 text-sm">
+              <li>@mitiendaElectro</li>
+              <li>+54 11 1234-5678</li>
+            </ul>
+          </div>
         </div>
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm">
           © {new Date().getFullYear()} Mi Tienda. Todos los derechos reservados.

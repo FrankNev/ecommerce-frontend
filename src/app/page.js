@@ -2,6 +2,13 @@ import HomepageCarousel from '@/components/home/HomepageCarousel';
 import BrandCard from '@/components/home/BrandCard';
 import FeaturesSection from '@/components/home/FeaturesSection';
 import FAQSection from '@/components/home/FAQSection';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselPrevious,
+  CarouselNext,
+} from '@/components/ui/carousel';
 
 export const metadata = {
   title: 'Inicio',
@@ -25,21 +32,27 @@ export default function HomePage() {
       {/* Marcas */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Explorá por marca</h2>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))',
-            gap: '1rem',
+        <Carousel
+          opts={{
+            align: "start",
+            loop: true,
           }}
         >
-          {BRANDS.map(brand => (
-            <BrandCard key={brand.name} brand={brand} />
-          ))}
-        </div>
+          <CarouselContent className="ml-0">
+            {BRANDS.map(brand => (
+              <CarouselItem key={brand.name} className="px-3 py-2 basis-auto min-w-fit">
+                <BrandCard brand={brand} />
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+
+        </Carousel>
       </section>
 
       {/* Features */}
-      <FeaturesSection />
+      <div className="bg-gray-900 py-8">
+        <FeaturesSection />
+      </div>
 
       {/* FAQ */}
       <FAQSection />

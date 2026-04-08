@@ -17,7 +17,7 @@ const SLIDES = [
         title: 'Los últimos smartphones',
         subtitle: 'Encontrá el tuyo al mejor precio',
         cta: 'Ver productos',
-        href: '/products',
+        categoryId: '2',
         overlay: true,
     },
     {
@@ -25,7 +25,7 @@ const SLIDES = [
         title: 'Smartwatches y wearables',
         subtitle: 'Tecnología en tu muñeca',
         cta: 'Explorar',
-        href: '/products',
+        categoryId: '3',
         overlay: true,
     },
     {
@@ -33,7 +33,7 @@ const SLIDES = [
         title: 'Audio de alta calidad',
         subtitle: 'Auriculares y parlantes premium',
         cta: 'Ver más',
-        href: '/products',
+        categoryId: '4',
         overlay: true,
     },
 ];
@@ -78,7 +78,7 @@ export default function HomepageCarousel() {
                                             <h2 className="text-4xl font-bold leading-tight">{slide.title}</h2>
                                             <p className="text-lg text-white/80">{slide.subtitle}</p>
                                             <Link
-                                                href={slide.href}
+                                                href={`/products?category=${slide.categoryId}`}
                                                 className="inline-block bg-white text-gray-900 px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition"
                                             >
                                                 {slide.cta}
