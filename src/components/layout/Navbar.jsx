@@ -125,7 +125,7 @@ export default function Navbar() {
               user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-9 w-9 rounded-full focus-visible:ring-0">
+                    <Button variant="ghost" className="relative h-9 w-9 rounded-full focus-visible:ring-0 cursor-pointer">
                       <Avatar className="h-9 w-9">
                         <AvatarFallback className="bg-black text-white font-semibold text-sm">
                           {user?.name?.charAt(0)?.toUpperCase() || <User size={16} />}

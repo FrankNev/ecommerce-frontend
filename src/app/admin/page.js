@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, Store } from 'lucide-react';
 
 const STATUS_LABELS = {
   pending: { label: 'Pendiente', variant: 'secondary' },
@@ -256,15 +256,15 @@ export default function AdminPage() {
                     <p className="text-center text-gray-500 py-8">No hay órdenes que coincidan con la búsqueda</p>
                   ) : (
                     filteredOrders.map(order => (
-                      <div key={order.id} className="border border-gray-200 rounded-lg">
+                      <div key={order.id} className="border border-gray-200 rounded-md">
                         <button
                           onClick={() => setExpandedOrderId(expandedOrderId === order.id ? null : order.id)}
                           className="w-full flex items-center justify-between p-4 hover:bg-gray-50"
                         >
-                          <div className="flex items-center gap-4 flex-1 text-left">
-                            <div className="flex-1">
+                          <div className="flex justify-between flex-1 text-left min-w-0">
+                            <div className="flex-1 min-w-0">
                               <p className="font-medium">Orden #{order.id}</p>
-                              <p className="text-sm text-gray-500">{order.user_email}</p>
+                              <p className="text-sm text-gray-500 truncate">{order.user_email}</p>
                             </div>
                             <div className="flex items-center gap-6">
                               <div>
@@ -293,31 +293,40 @@ export default function AdminPage() {
                         {/* Detalles expandidos */}
                         {expandedOrderId === order.id && (
                           <div className="border-t border-gray-200 bg-gray-50 p-4">
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-                              <div>
+                            <div className="mb-6">
+                              <div className='mb-6'>
                                 <p className="text-xs font-semibold text-gray-500 uppercase">Fecha</p>
                                 <p className="text-sm">{new Date(order.created_at).toLocaleDateString('es-AR', {
                                   year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
                                 })}</p>
                               </div>
-                              <div>
-                                <p className="text-xs font-semibold text-gray-500 uppercase">Estado</p>
-                                <Badge variant="default" className="w-fit mt-1">
-                                  {STATUS_LABELS[order.status]?.label || order.status}
-                                </Badge>
+                              <div className="flex justify-between flex-col md:flex-row gap-4 md:gap-0 mb-6">
+                                <div>
+                                  <p className="text-xs font-semibold text-gray-500 uppercase">Estado</p>
+                                  <Badge variant="default" className="w-fit mt-1">
+                                    {STATUS_LABELS[order.status]?.label || order.status}
+                                  </Badge>
+                                </div>
+                                <div>
+                                  <p className="text-xs font-semibold text-gray-500 uppercase">Método de Pago</p>
+                                  <Badge className="w-fit mt-1">
+                                    {order.payment_method === 'transfer' ? 'Transferencia' : 'Mercado Pago'}
+                                  </Badge>
+                                </div>
+                                <div>
+                                  <p className="text-xs font-semibold text-gray-500 uppercase">Tipo de Envío</p>
+                                  <Badge className="w-fit mt-1" variant={order.shipping_data?.shipping_type === 'pickup' ? 'secondary' : 'default'}>
+                                    {order.shipping_data?.shipping_type === 'pickup' ? 'Retiro en Local' : 'Envío a Domicilio'}
+                                  </Badge>
+                                </div>
                               </div>
-                              <div>
-                                <p className="text-xs font-semibold text-gray-500 uppercase">Método de Pago</p>
-                                <Badge className="w-fit mt-1" variant={order.payment_method === 'transfer' ? 'secondary' : 'default'}>
-                                  {order.payment_method === 'transfer' ? 'Transferencia' : 'Mercado Pago'}
-                                </Badge>
-                              </div>
-                              <div>
-                                <p className="text-xs font-semibold text-gray-500 uppercase">Tipo de Envío</p>
-                                <Badge className="w-fit mt-1" variant={order.shipping_data?.shipping_type === 'pickup' ? 'secondary' : 'default'}>
-                                  {order.shipping_data?.shipping_type === 'pickup' ? 'Retiro en Local' : 'Envío a Domicilio'}
-                                </Badge>
-                              </div>
+                              {order.payment_method == 'transfer' ? (
+                                <div>
+                                  <p className="text-xs font-semibold text-gray-500 uppercase">Datos de Transferencia</p>
+                                  <p className="text-sm mt-1">N° Comprobante: {order.transfer_receipt}</p>
+                                  <p className="text-sm mt-1">N° Contacto: {order.contact_phone}</p>
+                                </div>
+                              ) : (null)}
                             </div>
                             <div className="mb-6">
                               <p className="text-sm font-semibold mb-3">Productos ({order.items?.length || 0})</p>
@@ -530,6 +539,6 @@ export default function AdminPage() {
           </DialogContent>
         </Dialog>
       </div>
-    </AdminGuard>
+    </AdminGuard >
   );
 }

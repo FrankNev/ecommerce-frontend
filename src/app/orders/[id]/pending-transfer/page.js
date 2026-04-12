@@ -9,13 +9,13 @@ export default function PendingTransferPage({ params }) {
       <h1 className="text-2xl font-bold text-gray-900">¡Pedido recibido!</h1>
       <p className="text-gray-500">
         Tu pedido quedó registrado y está pendiente de confirmación.
-        Una vez que acreditemos tu transferencia, te notificaremos por email.
+        Una vez que acreditemos tu transferencia, nos vamos a comunicar al teléfono que nos proporcionaste.
       </p>
       <div className="bg-gray-50 rounded-2xl p-6 text-left space-y-2 text-sm">
         <p className="font-semibold text-gray-900 mb-3">¿Qué hacer ahora?</p>
-        <p className="text-gray-600">1. Realizá la transferencia al CBU/Alias que te mostramos en el checkout</p>
-        <p className="text-gray-600">2. Guardá el comprobante</p>
-        <p className="text-gray-600">3. Esperá la confirmación por email</p>
+        <p className="text-gray-600">1. Guardá el comprobante. Te lo vamos a solicitar.</p>
+        <p className="text-gray-600">2. Quedate atento a tu WhatsApp para que nos comuniquemos con vos.</p>
+        <p className="text-gray-600">3. Apretá el botón "Ver mis órdenes" de abajo. Una vez confirmemos tu transferencia, aparecerá con estado "Confirmado"</p>
       </div>
       <div className="flex flex-col sm:flex-row gap-4 justify-center">
         <Link

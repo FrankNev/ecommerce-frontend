@@ -66,7 +66,7 @@ export default async function ProductDetailPage({ params }) {
                 {product.images.map((img, index) => (
                   <CarouselItem key={index}>
                     <div
-                      className="bg-gray-50 rounded-2xl overflow-hidden border flex items-center justify-center"
+                      className="bg-gray-50 rounded-2md overflow-hidden border flex items-center justify-center"
                       style={{ height: '420px' }}
                     >
                       <img

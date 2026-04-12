@@ -80,6 +80,13 @@ export default function OrdersPage() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
+                <div className="flex-col space-y-2">
+                  <p className="text-sm">Forma de pago: {order.payment_method === 'transfer' ? 'Transferencia bancaria' : 'Mercado Pago'}</p>
+                  {order.payment_method === 'transfer' && (
+                    <p className="text-sm">N° Comprobante: {order.transfer_receipt}</p>
+                  )}
+                  <p className="text-sm">Tipo de envío: {order.shipping_data?.shipping_type === 'pickup' ? 'Retiro en local' : 'Envío a domicilio'}</p>
+                </div>
                 <div className="space-y-2">
                   {order.items?.map(item => (
                     <div key={item.id} className="flex justify-between text-sm">
@@ -88,7 +95,7 @@ export default function OrdersPage() {
                     </div>
                   ))}
                 </div>
-                <div className="border-t pt-4 flex justify-between font-bold">
+                <div className="border-t pt-4 flex justify-between font-bold text-sm">
                   <span>Total</span>
                   <span>${Number(order.total).toLocaleString('es-AR')}</span>
                 </div>

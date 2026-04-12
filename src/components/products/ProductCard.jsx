@@ -6,7 +6,7 @@ export default function ProductCard({ product }) {
 
   return (
     <Link href={`/products/${product._id}`} className="group">
-      <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition">
+      <div className="bg-white rounded-2md overflow-hidden shadow-sm hover:shadow-md transition">
 
         {/* Imagen */}
         <div className="relative bg-gray-100 overflow-hidden" style={{ height: '200px' }}>

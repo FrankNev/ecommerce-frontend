@@ -30,6 +30,10 @@ export default function CheckoutPage() {
   const [shippingType, setShippingType] = useState('home');
   const [bankInfo, setBankInfo] = useState(null);
   const [mounted, setMounted] = useState(false);
+  const [transferData, setTransferData] = useState({
+    receipt: '',
+    phone: '',
+  });
   const [shipping, setShipping] = useState({
     nombre: '', apellido: '', telefono: '',
     direccion: '', numero: '', piso: '',
@@ -72,20 +76,26 @@ export default function CheckoutPage() {
     if (items.length === 0) { router.push('/cart'); return; }
     if (!validateShipping()) return;
 
+    if (paymentMethod === 'transfer') {
+      if (!transferData.receipt.trim()) {
+        toast.error('Ingresá el número de operación de la transferencia');
+        return;
+      }
+      if (!transferData.phone.trim()) {
+        toast.error('Ingresá tu teléfono de contacto');
+        return;
+      }
+    }
+
     setLoading(true);
     try {
-      const shippingData = {
-        ...shipping,
-        shipping_type: shippingType,
-      };
-
       const { data: order } = await ecommerceAPI.post('/api/orders', {
-        items: items.map(({ product, quantity, itemKey }) => ({
+        items: items.map(({ product, quantity }) => ({
           product_id: product._id,
           quantity,
           variant_id: product.selectedVariant?._id || null,
         })),
-        shipping_data: shippingData,
+        shipping_data: shippingType === 'pickup' ? { shipping_type: 'pickup' } : { ...shipping, shipping_type: 'home' },
       });
 
       if (paymentMethod === 'mercadopago') {
@@ -98,12 +108,14 @@ export default function CheckoutPage() {
       } else {
         await ecommerceAPI.post('/api/payments/confirm-transfer', {
           orderId: order.orderId,
+          transferReceipt: transferData.receipt,
+          contactPhone: transferData.phone,
         });
         clearCart();
         router.push(`/orders/${order.orderId}/pending-transfer`);
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Error al procesar el pago');
+      toast.error(error.response?.data?.message || 'Error en checkout');
     } finally {
       setLoading(false);
     }
@@ -131,15 +143,13 @@ export default function CheckoutPage() {
             <CardContent className="space-y-3">
               <div
                 onClick={() => setPaymentMethod('mercadopago')}
-                className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition ${
-                  paymentMethod === 'mercadopago'
-                    ? 'border-black bg-gray-50'
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
+                className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition ${paymentMethod === 'mercadopago'
+                  ? 'border-black bg-gray-50'
+                  : 'border-gray-200 hover:border-gray-300'
+                  }`}
               >
-                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                  paymentMethod === 'mercadopago' ? 'border-black' : 'border-gray-300'
-                }`}>
+                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${paymentMethod === 'mercadopago' ? 'border-black' : 'border-gray-300'
+                  }`}>
                   {paymentMethod === 'mercadopago' && (
                     <div className="w-2.5 h-2.5 rounded-full bg-black" />
                   )}
@@ -152,15 +162,13 @@ export default function CheckoutPage() {
 
               <div
                 onClick={() => setPaymentMethod('transfer')}
-                className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition ${
-                  paymentMethod === 'transfer'
-                    ? 'border-black bg-gray-50'
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
+                className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition ${paymentMethod === 'transfer'
+                  ? 'border-black bg-gray-50'
+                  : 'border-gray-200 hover:border-gray-300'
+                  }`}
               >
-                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                  paymentMethod === 'transfer' ? 'border-black' : 'border-gray-300'
-                }`}>
+                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${paymentMethod === 'transfer' ? 'border-black' : 'border-gray-300'
+                  }`}>
                   {paymentMethod === 'transfer' && (
                     <div className="w-2.5 h-2.5 rounded-full bg-black" />
                   )}
@@ -178,28 +186,57 @@ export default function CheckoutPage() {
 
               {/* Datos bancarios */}
               {paymentMethod === 'transfer' && bankInfo && (
-                <div className="bg-gray-50 rounded-xl p-4 space-y-2 text-sm">
-                  <p className="font-semibold text-gray-900 mb-3">Datos para la transferencia</p>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Titular</span>
-                    <span className="font-medium">{bankInfo.holder}</span>
+                <div className="space-y-4">
+                  <div className="bg-gray-50 rounded-xl p-4 space-y-2 text-sm">
+                    <p className="font-semibold text-gray-900 mb-3">Datos para la transferencia</p>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Titular</span>
+                      <span className="font-medium">{bankInfo.holder}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Banco</span>
+                      <span className="font-medium">{bankInfo.bank}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">CBU/CVU</span>
+                      <span className="font-medium font-mono text-xs">{bankInfo.cbu}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Alias</span>
+                      <span className="font-medium">{bankInfo.alias}</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Banco</span>
-                    <span className="font-medium">{bankInfo.bank}</span>
+
+                  <Separator />
+
+                  <div className="space-y-4">
+                    <p className="text-sm font-semibold text-gray-700">Datos del comprobante</p>
+
+                    <div className="space-y-1">
+                      <Label htmlFor="receipt">Número de operación *</Label>
+                      <Input
+                        id="receipt"
+                        value={transferData.receipt}
+                        onChange={(e) => setTransferData({ ...transferData, receipt: e.target.value })}
+                        placeholder="Ej: 0012345678"
+                      />
+                      <p className="text-xs text-gray-400">Encontralo en el comprobante de tu transferencia</p>
+                    </div>
+
+                    <div className="space-y-1">
+                      <Label htmlFor="contactPhone">Teléfono de contacto *</Label>
+                      <Input
+                        id="contactPhone"
+                        value={transferData.phone}
+                        onChange={(e) => setTransferData({ ...transferData, phone: e.target.value })}
+                        placeholder="+54 11 1234-5678"
+                      />
+                      <p className="text-xs text-gray-400">Te contactaremos para confirmar el pago</p>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">CBU/CVU</span>
-                    <span className="font-medium font-mono text-xs">{bankInfo.cbu}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Alias</span>
-                    <span className="font-medium">{bankInfo.alias}</span>
-                  </div>
-                  <Separator className="my-2" />
+
                   <p className="text-xs text-gray-400">
-                    Una vez realizada la transferencia, tu pedido quedará pendiente de confirmación.
-                    Te notificaremos cuando acreditemos el pago.
+                    Una vez enviado tu pedido, quedará pendiente hasta que confirmemos la transferencia.
                   </p>
                 </div>
               )}
@@ -212,15 +249,13 @@ export default function CheckoutPage() {
             <CardContent className="space-y-3">
               <div
                 onClick={() => setShippingType('home')}
-                className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition ${
-                  shippingType === 'home'
-                    ? 'border-black bg-gray-50'
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
+                className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition ${shippingType === 'home'
+                  ? 'border-black bg-gray-50'
+                  : 'border-gray-200 hover:border-gray-300'
+                  }`}
               >
-                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                  shippingType === 'home' ? 'border-black' : 'border-gray-300'
-                }`}>
+                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${shippingType === 'home' ? 'border-black' : 'border-gray-300'
+                  }`}>
                   {shippingType === 'home' && (
                     <div className="w-2.5 h-2.5 rounded-full bg-black" />
                   )}
@@ -233,15 +268,13 @@ export default function CheckoutPage() {
 
               <div
                 onClick={() => setShippingType('pickup')}
-                className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition ${
-                  shippingType === 'pickup'
-                    ? 'border-black bg-gray-50'
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
+                className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition ${shippingType === 'pickup'
+                  ? 'border-black bg-gray-50'
+                  : 'border-gray-200 hover:border-gray-300'
+                  }`}
               >
-                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                  shippingType === 'pickup' ? 'border-black' : 'border-gray-300'
-                }`}>
+                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${shippingType === 'pickup' ? 'border-black' : 'border-gray-300'
+                  }`}>
                   {shippingType === 'pickup' && (
                     <div className="w-2.5 h-2.5 rounded-full bg-black" />
                   )}
@@ -256,67 +289,67 @@ export default function CheckoutPage() {
 
           {/* Datos de envío - solo visible si es envío a domicilio */}
           {shippingType === 'home' && (
-          <Card>
-            <CardHeader><CardTitle>Datos de envío</CardTitle></CardHeader>
-            <CardContent className="space-y-4">
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div className="space-y-1">
-                  <Label htmlFor="nombre">Nombre *</Label>
-                  <Input id="nombre" name="nombre" value={shipping.nombre} onChange={handleChange} placeholder="Juan" />
+            <Card>
+              <CardHeader><CardTitle>Datos de envío</CardTitle></CardHeader>
+              <CardContent className="space-y-4">
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <div className="space-y-1">
+                    <Label htmlFor="nombre">Nombre *</Label>
+                    <Input id="nombre" name="nombre" value={shipping.nombre} onChange={handleChange} placeholder="Ingrese su nombre..." />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="apellido">Apellido *</Label>
+                    <Input id="apellido" name="apellido" value={shipping.apellido} onChange={handleChange} placeholder="Ingrese su apellido..." />
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <Label htmlFor="apellido">Apellido *</Label>
-                  <Input id="apellido" name="apellido" value={shipping.apellido} onChange={handleChange} placeholder="Pérez" />
-                </div>
-              </div>
 
-              <div className="space-y-1">
-                <Label htmlFor="telefono">Teléfono *</Label>
-                <Input id="telefono" name="telefono" value={shipping.telefono} onChange={handleChange} placeholder="+54 11 1234-5678" />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem' }}>
                 <div className="space-y-1">
-                  <Label htmlFor="direccion">Dirección *</Label>
-                  <Input id="direccion" name="direccion" value={shipping.direccion} onChange={handleChange} placeholder="Av. Corrientes" />
+                  <Label htmlFor="telefono">Teléfono *</Label>
+                  <Input id="telefono" name="telefono" value={shipping.telefono} onChange={handleChange} placeholder="Ej.: +54 11 1234-5678" />
                 </div>
-                <div className="space-y-1">
-                  <Label htmlFor="numero">Número *</Label>
-                  <Input id="numero" name="numero" value={shipping.numero} onChange={handleChange} placeholder="1234" />
-                </div>
-              </div>
 
-              <div className="space-y-1">
-                <Label htmlFor="piso">Piso / Depto <span className="text-gray-400 font-normal">(opcional)</span></Label>
-                <Input id="piso" name="piso" value={shipping.piso} onChange={handleChange} placeholder="3° B" />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div className="space-y-1">
-                  <Label htmlFor="ciudad">Ciudad *</Label>
-                  <Input id="ciudad" name="ciudad" value={shipping.ciudad} onChange={handleChange} placeholder="Buenos Aires" />
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem' }}>
+                  <div className="space-y-1">
+                    <Label htmlFor="direccion">Dirección *</Label>
+                    <Input id="direccion" name="direccion" value={shipping.direccion} onChange={handleChange} placeholder="Ingrese su dirección..." />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="numero">Número *</Label>
+                    <Input id="numero" name="numero" value={shipping.numero} onChange={handleChange} placeholder="Ingrese el número de calle..." />
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <Label htmlFor="codigo_postal">Código postal *</Label>
-                  <Input id="codigo_postal" name="codigo_postal" value={shipping.codigo_postal} onChange={handleChange} placeholder="1043" />
-                </div>
-              </div>
 
-              <div className="space-y-1">
-                <Label htmlFor="provincia">Provincia *</Label>
-                <select
-                  id="provincia" name="provincia" value={shipping.provincia}
-                  onChange={handleChange}
-                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black"
-                >
-                  <option value="">Seleccioná una provincia</option>
-                  {PROVINCIAS.map(p => (
-                    <option key={p} value={p}>{p}</option>
-                  ))}
-                </select>
-              </div>
-            </CardContent>
-          </Card>
+                <div className="space-y-1">
+                  <Label htmlFor="piso">Piso / Depto <span className="text-gray-400 font-normal">(opcional)</span></Label>
+                  <Input id="piso" name="piso" value={shipping.piso} onChange={handleChange} placeholder="3° B" />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <div className="space-y-1">
+                    <Label htmlFor="ciudad">Ciudad *</Label>
+                    <Input id="ciudad" name="ciudad" value={shipping.ciudad} onChange={handleChange} placeholder="Ingrese la ciudad..." />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="codigo_postal">Código postal *</Label>
+                    <Input id="codigo_postal" name="codigo_postal" value={shipping.codigo_postal} onChange={handleChange} placeholder="Ingrese su código postal..." />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <Label htmlFor="provincia">Provincia *</Label>
+                  <select
+                    id="provincia" name="provincia" value={shipping.provincia}
+                    onChange={handleChange}
+                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                  >
+                    <option value="">Seleccioná una provincia</option>
+                    {PROVINCIAS.map(p => (
+                      <option key={p} value={p}>{p}</option>
+                    ))}
+                  </select>
+                </div>
+              </CardContent>
+            </Card>
           )}
 
           {/* Datos del comprador */}
