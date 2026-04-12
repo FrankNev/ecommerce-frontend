@@ -1,3 +1,4 @@
+import ProductJsonLd from '@/components/products/ProductJsonLd';
 import VariantSelector from '@/components/products/VariantSelector';
 import { Separator } from '@/components/ui/separator';
 import {
@@ -10,15 +11,46 @@ import {
 
 export async function generateMetadata({ params }) {
   const { id } = await params;
+
   try {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_ECOMMERCE_API_URL}/api/products/${id}`,
-      { cache: 'no-store' }
+      { next: { revalidate: 3600 } }
     );
-    const data = await res.json();
-    return { title: data.name, description: data.description };
+    const product = await res.json();
+
+    const title = product.name;
+    const description = product.description
+      ? product.description.slice(0, 160)
+      : `Comprá ${product.name} al mejor precio.`;
+    const image = product.images?.[0] || '/og-image.jpg';
+
+    return {
+      title,
+      description,
+      openGraph: {
+        title,
+        description,
+        url: `https://ecommerce-frontend-nine-ebon.vercel.app/products/${id}`,
+        images: [{ url: image, width: 800, height: 800, alt: title }],
+        type: 'website',
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title,
+        description,
+        images: [image],
+      },
+      other: {
+        'product:price:amount': product.price,
+        'product:price:currency': 'ARS',
+      },
+    };
   } catch {
-    return { title: 'Producto' };
+    return {
+      title: 'Producto no encontrado',
+      description: 'Este producto no está disponible.',
+    };
   }
 }
 
@@ -49,6 +81,7 @@ export default async function ProductDetailPage({ params }) {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
+      <ProductJsonLd product={product} />
 
       {/* SECCIÓN PRINCIPAL: Imagen + Info */}
       <div
