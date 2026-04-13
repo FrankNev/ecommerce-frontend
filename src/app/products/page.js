@@ -71,18 +71,22 @@ export default async function ProductsPage({ searchParams }) {
               {/* Paginación */}
               {pages > 1 && (
                 <div className="flex justify-center gap-2 mt-10">
-                  {Array.from({ length: pages }, (_, i) => i + 1).map(page => (
-                    <Link
-                      key={page}
-                      href={`/products?page=${page}`}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition ${page === currentPage
-                        ? 'bg-black text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
-                    >
-                      {page}
-                    </Link>
-                  ))}
+                  {Array.from({ length: pages }, (_, i) => i + 1).map(page => {
+                    const pageParams = new URLSearchParams(params);
+                    pageParams.set('page', page);
+                    return (
+                      <Link
+                        key={page}
+                        href={`/products?${pageParams.toString()}`}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition ${page === currentPage
+                            ? 'bg-black text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                      >
+                        {page}
+                      </Link>
+                    );
+                  })}
                 </div>
               )}
             </>
