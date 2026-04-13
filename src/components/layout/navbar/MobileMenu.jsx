@@ -25,7 +25,7 @@ export default function MobileMenu({
     return (
         <>
             {/* Botones mobile */}
-            <div className="flex md:hidden items-center gap-1">
+            <div className="flex md:hidden items-center gap-1 ml-auto">
                 <Button variant="ghost" size="icon" onClick={onToggleSearch}>
                     <Search size={22} />
                 </Button>
@@ -102,17 +102,6 @@ export default function MobileMenu({
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
-
-            {/* Búsqueda expandida mobile */}
-            {searchExpanded && (
-                <div className="md:hidden border-t bg-white px-4 py-3">
-                    <SearchBar
-                        inputRef={searchInputRef}
-                        onSearch={onToggleSearch}
-                        placeholder="Buscar productos"
-                    />
-                </div>
-            )}
         </>
     );
 }

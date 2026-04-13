@@ -4,7 +4,7 @@ export default function ProductJsonLd({ product }) {
     '@type': 'Product',
     name: product.name,
     description: product.description,
-    image: product.images,
+    image: product.images?.map(img => img.url),
     offers: {
       '@type': 'Offer',
       price: product.price,

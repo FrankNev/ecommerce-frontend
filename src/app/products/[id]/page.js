@@ -23,7 +23,7 @@ export async function generateMetadata({ params }) {
     const description = product.description
       ? product.description.slice(0, 160)
       : `Comprá ${product.name} al mejor precio.`;
-    const image = product.images?.[0] || '/og-image.jpg';
+    const image = product.images?.[0]?.url || '/og-image.jpg';
 
     return {
       title,

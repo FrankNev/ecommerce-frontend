@@ -1,12 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { Search } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import useAuthStore from '@/store/useAuthStore';
 import useCartStore from '@/store/useCartStore';
 import { ecommerceAPI } from '@/lib/axios';
-import { Button } from '@/components/ui/button';
 import SearchBar from '@/components/search/SearchBar';
 import NavbarActions from '@/components/layout/navbar/NavbarActions';
 import NavbarCategories from '@/components/layout/navbar/NavbarCategories';
@@ -15,7 +13,6 @@ import MobileMenu from '@/components/layout/navbar/MobileMenu';
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
   const [categories, setCategories] = useState([]);
-  const [expandSearchDesktop, setExpandSearchDesktop] = useState(false);
   const [expandSearchMobile, setExpandSearchMobile] = useState(false);
   const { user, logout } = useAuthStore();
   const count = useCartStore(state => state.getCount());
@@ -28,49 +25,35 @@ export default function Navbar() {
       try {
         const { data } = await ecommerceAPI.get('/api/categories');
         setCategories(data);
-      } catch {}
+      } catch { }
     };
     if (mounted) fetchCategories();
   }, [mounted]);
 
   useEffect(() => {
-    if ((expandSearchDesktop || expandSearchMobile) && searchInputRef.current) {
+    if (expandSearchMobile && searchInputRef.current) {
       searchInputRef.current.focus();
     }
-  }, [expandSearchDesktop, expandSearchMobile]);
+  }, [expandSearchMobile]);
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white border-b shadow-sm">
 
       {/* Nivel 1 */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 gap-4">
+        <div className="flex items-center h-16 gap-4">
 
+          {/* Logo */}
           <Link href="/" className="text-2xl font-black tracking-tighter text-gray-900 shrink-0">
             Mi Tienda
           </Link>
 
-          {/* Búsqueda desktop */}
-          {expandSearchDesktop ? (
-            <div className="hidden md:flex flex-1 max-w-xl">
-              <SearchBar
-                inputRef={searchInputRef}
-                onSearch={() => setExpandSearchDesktop(false)}
-              />
+          {/* SearchBar siempre visible en desktop, centrada */}
+          <div className="hidden md:flex flex-1 justify-center px-8">
+            <div className="w-full max-w-xl">
+              <SearchBar placeholder="Buscar productos..." />
             </div>
-          ) : (
-            <div className="hidden md:flex flex-1" />
-          )}
-
-          {/* Botón búsqueda desktop */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="hidden md:flex mx-1"
-            onClick={() => setExpandSearchDesktop(!expandSearchDesktop)}
-          >
-            <Search size={22} />
-          </Button>
+          </div>
 
           {/* Acciones desktop */}
           {mounted && (
@@ -95,9 +78,18 @@ export default function Navbar() {
           )}
 
         </div>
+        {expandSearchMobile && (
+          <div className="md:hidden border-t bg-white px-4 py-3">
+            <SearchBar
+              inputRef={searchInputRef}
+              onSearch={() => setExpandSearchMobile(false)}
+              placeholder="Buscar productos"
+            />
+          </div>
+        )}
       </div>
 
-      {/* Nivel 2 */}
+      {/* Nivel 2 — categorías desktop */}
       {mounted && (
         <NavbarCategories categories={categories} user={user} />
       )}

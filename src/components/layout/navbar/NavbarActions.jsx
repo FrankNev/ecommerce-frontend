@@ -15,7 +15,7 @@ import {
 
 export default function NavbarActions({ user, cartCount, onLogout }) {
   return (
-    <div className="hidden md:flex items-center gap-1">
+    <div className="hidden md:flex items-center gap-1 shrink-0">
 
       <Button variant="ghost" size="icon" asChild className="relative mx-1">
         <Link href="/cart">

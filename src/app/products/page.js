@@ -22,6 +22,20 @@ async function getProducts(searchParams) {
   }
 }
 
+async function getBrands() {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_ECOMMERCE_API_URL}/api/products?limit=1000`,
+      { cache: 'no-store' }
+    );
+    const { products } = await res.json();
+    const brands = [...new Set(products.map(p => p.brand).filter(Boolean))].sort();
+    return brands;
+  } catch {
+    return [];
+  }
+}
+
 async function getCategories() {
   try {
     const res = await fetch(
@@ -36,9 +50,10 @@ async function getCategories() {
 
 export default async function ProductsPage({ searchParams }) {
   const params = await searchParams;
-  const [{ products, total, pages, currentPage }, categories] = await Promise.all([
+  const [{ products, total, pages, currentPage }, categories, brands] = await Promise.all([
     getProducts(params),
     getCategories(),
+    getBrands(),
   ]);
 
   return (
@@ -51,7 +66,7 @@ export default async function ProductsPage({ searchParams }) {
       <div className="flex flex-col md:flex-row gap-8">
         {/* Filtros */}
         <aside className="w-full md:w-64 shrink-0">
-          <ProductFilters categories={categories} />
+          <ProductFilters categories={categories} brands={brands} />
         </aside>
 
         {/* Grilla de productos */}
@@ -79,8 +94,8 @@ export default async function ProductsPage({ searchParams }) {
                         key={page}
                         href={`/products?${pageParams.toString()}`}
                         className={`px-4 py-2 rounded-lg text-sm font-medium transition ${page === currentPage
-                            ? 'bg-black text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          ? 'bg-black text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                           }`}
                       >
                         {page}
