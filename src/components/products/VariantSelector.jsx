@@ -3,54 +3,98 @@
 import { useState, useEffect } from 'react';
 import useCartStore from '@/store/useCartStore';
 import useAuthStore from '@/store/useAuthStore';
+import useProductImageStore from '@/store/useProductImageStore';
 import { useRouter, usePathname } from 'next/navigation';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 
+function findImageIndexForVariant(variant, images, variantIndex) {
+  if (!images || images.length === 0) return 0;
+
+  const attrs = variant.attributes
+    ? Object.fromEntries(
+        variant.attributes instanceof Map
+          ? variant.attributes
+          : Object.entries(variant.attributes)
+      )
+    : {};
+
+  const colorKeys = ['color', 'colour', 'Color', 'Colour', 'COLOR'];
+  let colorValue = null;
+  for (const key of colorKeys) {
+    if (attrs[key]) { colorValue = attrs[key]; break; }
+  }
+
+  if (colorValue) {
+    const normalize = (str) =>
+      str
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+
+    const normalizedColor = normalize(colorValue);
+
+    const matchIdx = images.findIndex((img) => {
+      const haystack = normalize(img.url + ' ' + (img.public_id || ''));
+      return haystack.includes(normalizedColor);
+    });
+
+    if (matchIdx !== -1) return matchIdx;
+  }
+
+  return Math.min(variantIndex, images.length - 1);
+}
+
 export default function VariantSelector({ product }) {
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const addItem = useCartStore(state => state.addItem);
   const user = useAuthStore(state => state.user);
+  const { setActiveIndex, reset } = useProductImageStore();
   const router = useRouter();
   const pathname = usePathname();
 
   const hasVariants = product.variants && product.variants.length > 0;
 
-  // Precio y stock según variante seleccionada
   const currentPrice = selectedVariant?.price ?? product.price;
   const priceWithoutIVA = (currentPrice / 1.21).toFixed(2);
   const currentStock = hasVariants
     ? (selectedVariant?.stock ?? 0)
     : product.stock;
 
-  // Si solo hay una variante, seleccionarla automáticamente
   useEffect(() => {
     if (hasVariants && product.variants.length === 1) {
-      setSelectedVariant(product.variants[0]);
+      handleVariantSelect(product.variants[0], 0);
     }
+    return () => reset();
   }, []);
 
-  // Obtener atributos únicos de las variantes como objeto plano
+  const handleVariantSelect = (variant, variantIndex) => {
+    setSelectedVariant(variant);
+    setQuantity(1);
+    const imgIdx = findImageIndexForVariant(variant, product.images, variantIndex);
+    setActiveIndex(imgIdx);
+  };
+
   const getVariantAttributes = (variant) => {
     if (!variant.attributes) return {};
-    // Soporta tanto Map serializado como objeto plano
+    if (variant.attributes instanceof Map) {
+      return Object.fromEntries(variant.attributes);
+    }
     if (typeof variant.attributes === 'object' && !Array.isArray(variant.attributes)) {
       return variant.attributes;
     }
     return {};
   };
 
-  // Obtener todas las keys de atributos de variantes
   const variantAttributeKeys = hasVariants
     ? [...new Set(
         product.variants.flatMap(v => Object.keys(getVariantAttributes(v)))
       )]
     : [];
 
-  // Obtener valores únicos por atributo
   const getUniqueValues = (key) => {
     return [...new Set(
       product.variants.map(v => getVariantAttributes(v)[key]).filter(Boolean)
@@ -99,7 +143,7 @@ export default function VariantSelector({ product }) {
 
       <Separator />
 
-      {/* Selector de variantes por atributo */}
+      {/* Selector de variantes */}
       {hasVariants && variantAttributeKeys.length > 0 && (
         <div className="space-y-4">
           {variantAttributeKeys.map(attrKey => (
@@ -107,10 +151,10 @@ export default function VariantSelector({ product }) {
               <p className="text-sm font-semibold text-gray-700 capitalize">{attrKey}</p>
               <div className="flex flex-wrap gap-2">
                 {getUniqueValues(attrKey).map(value => {
-                  // Encontrar la variante que coincide con este valor
-                  const matchingVariant = product.variants.find(v =>
+                  const variantIndex = product.variants.findIndex(v =>
                     getVariantAttributes(v)[attrKey] === value
                   );
+                  const matchingVariant = product.variants[variantIndex];
                   const isSelected = selectedVariant
                     ? getVariantAttributes(selectedVariant)[attrKey] === value
                     : false;
@@ -119,7 +163,9 @@ export default function VariantSelector({ product }) {
                   return (
                     <button
                       key={value}
-                      onClick={() => !isOutOfStock && setSelectedVariant(matchingVariant)}
+                      onClick={() =>
+                        !isOutOfStock && handleVariantSelect(matchingVariant, variantIndex)
+                      }
                       disabled={isOutOfStock}
                       className={`px-4 py-2 rounded-lg text-sm font-medium border transition-all ${
                         isSelected
@@ -155,7 +201,7 @@ export default function VariantSelector({ product }) {
         </div>
       </div>
 
-      {/* Botón agregar al carrito */}
+      {/* Botón agregar */}
       <Button
         className="w-full"
         onClick={handleAddToCart}

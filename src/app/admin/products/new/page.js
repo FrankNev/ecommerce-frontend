@@ -337,7 +337,7 @@ export default function NewProductPage() {
             <Button type="submit" className="flex-1" disabled={loading}>
               {loading ? 'Creando...' : 'Crear producto'}
             </Button>
-            <Button type="button" variant="outline" className="flex-1" onClick={() => router.push('/admin')}>
+            <Button type="button" className="flex-1 bg-white text-black" onClick={() => router.push('/admin')}>
               Cancelar
             </Button>
           </div>

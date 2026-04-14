@@ -1,14 +1,8 @@
 import ProductJsonLd from '@/components/products/ProductJsonLd';
 import VariantSelector from '@/components/products/VariantSelector';
 import ProductCarousel from '@/components/products/ProductCarousel';
+import ProductImageCarousel from '@/components/products/ProductImageCarousel';
 import { Separator } from '@/components/ui/separator';
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
 
 export async function generateMetadata({ params }) {
   const { id } = await params;
@@ -96,7 +90,7 @@ export default async function ProductDetailPage({ params }) {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
+    <div className="max-w-7xl rounded-md mt-4 mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12 bg-white">
       <ProductJsonLd product={product} />
 
       {/* SECCIÓN PRINCIPAL: Imagen + Info */}
@@ -109,48 +103,7 @@ export default async function ProductDetailPage({ params }) {
       >
         {/* Carrusel */}
         <div style={{ position: 'relative', width: '100%' }}>
-          {product.images?.length > 0 ? (
-            <Carousel className="w-full">
-              <CarouselContent>
-                {product.images.map((img, index) => (
-                  <CarouselItem key={index}>
-                    <div
-                      className="bg-gray-50 rounded-2md overflow-hidden border flex items-center justify-center"
-                      style={{ height: '420px' }}
-                    >
-                      <img
-                        src={img.url}
-                        alt={`${product.name} - Imagen ${index + 1}`}
-                        style={{
-                          maxHeight: '100%',
-                          maxWidth: '100%',
-                          objectFit: 'contain',
-                        }}
-                      />
-                    </div>
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-              {product.images.length > 1 && (
-                <>
-                  <CarouselPrevious style={{ left: '0px' }} />
-                  <CarouselNext style={{ right: '0px' }} />
-                </>
-              )}
-            </Carousel>
-          ) : (
-            <div
-              className="bg-gray-50 rounded-2md overflow-hidden border flex items-center justify-center"
-              style={{ height: '420px' }}
-            >
-              <img
-                src='https://res.cloudinary.com/dh10owmif/image/upload/v1776060127/images_sz53ic.png'
-                alt={product.name}
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                className="group-hover:scale-105 transition duration-300"
-              />
-            </div>
-          )}
+          < ProductImageCarousel images={product.images} productName={product.name} />
         </div>
 
         {/* Info + Variantes + Carrito */}
@@ -163,7 +116,7 @@ export default async function ProductDetailPage({ params }) {
         </div>
       </div>
 
-      {/* SECCIÓN INFERIOR: Descripción + Especificaciones */}
+      {/* SECCIÓN INTERMEDIA: Descripción + Especificaciones */}
       <div
         className="gap-10"
         style={{
@@ -185,7 +138,7 @@ export default async function ProductDetailPage({ params }) {
             <Separator />
             <div className="space-y-3">
               {Object.entries(product.attributes).map(([key, value]) => (
-                <div key={key} className="flex justify-between text-sm py-2 border-b border-gray-100 last:border-0">
+                <div key={key} className="flex justify-between text-sm py-2 border-b border-gray-300 last:border-0">
                   <span className="text-gray-500 capitalize font-medium">{key}</span>
                   <span className="font-semibold text-gray-900 text-right">{value}</span>
                 </div>
@@ -194,6 +147,8 @@ export default async function ProductDetailPage({ params }) {
           </div>
         )}
       </div>
+
+      {/* SECCIÓN INFERIOR: Carrusel de productos relacionados */}
       <ProductCarousel title="Productos relacionados" products={relatedProducts} />
     </div>
   );

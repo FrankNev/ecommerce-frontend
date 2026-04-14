@@ -34,7 +34,7 @@ export default function ProductFilters({ categories, brands }) {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm">
+    <div className="bg-white rounded-md shadow-sm">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="w-full md:hidden flex items-center justify-between p-5 font-semibold text-gray-900 border-b border-gray-200"

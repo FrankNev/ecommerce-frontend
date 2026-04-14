@@ -35,7 +35,7 @@ export default function FeaturesSection() {
         {FEATURES.map((feature, i) => (
           <div
             key={i}
-            className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col items-center text-center gap-4"
+            className="bg-white rounded-md border border-gray-100 shadow-sm p-6 flex flex-col items-center text-center gap-4"
           >
             <div
               className="bg-gray-50 rounded-xl flex items-center justify-center"

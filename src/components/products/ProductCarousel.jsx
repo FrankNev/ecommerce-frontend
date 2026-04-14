@@ -13,7 +13,7 @@ export default function ProductCarousel({ title, products = [] }) {
     if (products.length === 0) return null;
 
     return (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-4">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">{title}</h2>
             <Carousel opts={{ align: 'start', loop: products.length > 3 }}>
                 <CarouselContent className="-ml-4 px-2">

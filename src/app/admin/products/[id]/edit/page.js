@@ -423,7 +423,7 @@ export default function EditProductPage({ params }) {
             <Button type="submit" className="flex-1" disabled={loading}>
               {loading ? 'Guardando...' : 'Guardar cambios'}
             </Button>
-            <Button type="button" variant="outline" className="flex-1" onClick={() => router.push('/admin')}>
+            <Button type="button" className="flex-1 bg-white text-black" onClick={() => router.push('/admin')}>
               Cancelar
             </Button>
           </div>
