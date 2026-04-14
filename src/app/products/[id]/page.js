@@ -1,5 +1,6 @@
 import ProductJsonLd from '@/components/products/ProductJsonLd';
 import VariantSelector from '@/components/products/VariantSelector';
+import ProductCarousel from '@/components/products/ProductCarousel';
 import { Separator } from '@/components/ui/separator';
 import {
   Carousel,
@@ -67,9 +68,24 @@ async function getProduct(id) {
   }
 }
 
+async function getRelatedProducts(id) {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_ECOMMERCE_API_URL}/api/products/${id}/related?limit=6`,
+      { next: { revalidate: 3600 } }
+    );
+    return await res.json();
+  } catch {
+    return [];
+  }
+}
+
 export default async function ProductDetailPage({ params }) {
   const { id } = await params;
-  const product = await getProduct(id);
+  const [product, relatedProducts] = await Promise.all([
+    getProduct(id),
+    getRelatedProducts(id),
+  ]);
 
   if (!product) {
     return (
@@ -124,10 +140,15 @@ export default async function ProductDetailPage({ params }) {
             </Carousel>
           ) : (
             <div
-              className="bg-gray-100 rounded-2xl flex items-center justify-center text-6xl"
+              className="bg-gray-50 rounded-2md overflow-hidden border flex items-center justify-center"
               style={{ height: '420px' }}
             >
-              📦
+              <img
+                src='https://res.cloudinary.com/dh10owmif/image/upload/v1776060127/images_sz53ic.png'
+                alt={product.name}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                className="group-hover:scale-105 transition duration-300"
+              />
             </div>
           )}
         </div>
@@ -173,7 +194,7 @@ export default async function ProductDetailPage({ params }) {
           </div>
         )}
       </div>
-
+      <ProductCarousel title="Productos relacionados" products={relatedProducts} />
     </div>
   );
 }

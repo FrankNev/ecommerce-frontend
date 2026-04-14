@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-export default function ProductCard({ product }) {
+export default function ProductCard({ product, totalHeight }) {
   const image = product.images?.[0]?.url;
   const isOutOfStock = product.stock === 0;
 
@@ -9,7 +9,7 @@ export default function ProductCard({ product }) {
       <div className="bg-white rounded-2md overflow-hidden shadow-sm hover:shadow-md transition">
 
         {/* Imagen */}
-        <div className="relative bg-gray-100 overflow-hidden" style={{ height: '200px' }}>
+        <div className="relative bg-gray-100 overflow-hidden" style={{ height: totalHeight }}>
           {image ? (
             <img
               src={image}
@@ -19,7 +19,12 @@ export default function ProductCard({ product }) {
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gray-400 text-4xl">
-              📦
+                <img
+                  src='https://res.cloudinary.com/dh10owmif/image/upload/v1776060127/images_sz53ic.png'
+                  alt={product.name}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  className="group-hover:scale-105 transition duration-300"
+                />
             </div>
           )}
 
@@ -44,9 +49,6 @@ export default function ProductCard({ product }) {
           <p className="text-lg font-bold text-gray-900 mt-2">
             ${product.price.toLocaleString('es-AR')}
           </p>
-          {product.variants?.length > 0 && (
-            <p className="text-xs text-gray-400 mt-1">{product.variants.length} variantes disponibles</p>
-          )}
         </div>
       </div>
     </Link>
