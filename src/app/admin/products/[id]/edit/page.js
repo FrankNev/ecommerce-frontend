@@ -113,11 +113,10 @@ export default function EditProductPage({ params }) {
     setVariants(updated);
   };
 
-  // Imágenes
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
-    setImages(files);
-    setPreviews(files.map(f => URL.createObjectURL(f)));
+    setImages(prev => [...prev, ...files]);
+    setPreviews(prev => [...prev, ...files.map(f => URL.createObjectURL(f))]);
   };
 
   const handleDeleteExistingImage = async (publicId, index) => {

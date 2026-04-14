@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import AdminGuard from '@/components/auth/AdminGuard';
 
 export default function NewProductPage() {
@@ -73,11 +72,10 @@ export default function NewProductPage() {
     setVariants(updated);
   };
 
-  // Imágenes
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
-    setImages(files);
-    setPreviews(files.map(f => URL.createObjectURL(f)));
+    setImages(prev => [...prev, ...files]);
+    setPreviews(prev => [...prev, ...files.map(f => URL.createObjectURL(f))]);
   };
 
   const handleSubmit = async (e) => {
