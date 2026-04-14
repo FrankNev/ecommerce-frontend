@@ -21,6 +21,7 @@ const BRANDS = [
   { name: 'Samsung', logo: 'https://simpleicons.org/icons/samsung.svg' },
   { name: 'Motorola', logo: 'https://simpleicons.org/icons/motorola.svg' },
   { name: 'Xiaomi', logo: 'https://simpleicons.org/icons/xiaomi.svg' },
+  { name: 'JBL', logo: 'https://simpleicons.org/icons/jbl.svg' },
   { name: 'PlayStation', logo: 'https://simpleicons.org/icons/playstation.svg' },
 ];
 

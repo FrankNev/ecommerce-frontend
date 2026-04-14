@@ -6,7 +6,7 @@ export default function ProductCard({ product, totalHeight }) {
 
   return (
     <Link href={`/products/${product._id}`} className="group">
-      <div className="bg-white rounded-2md overflow-hidden shadow-sm hover:shadow-md transition">
+      <div className="bg-white rounded-2md overflow-hidden shadow-sm hover:shadow-md transition" style={{ minWidth:200 }}>
 
         {/* Imagen */}
         <div className="relative bg-gray-100 overflow-hidden" style={{ height: totalHeight }}>
@@ -14,7 +14,7 @@ export default function ProductCard({ product, totalHeight }) {
             <img
               src={image}
               alt={product.name}
-              style={{ width: '100%', height: '120%', objectFit: 'cover' }}
+              style={{ width: '110%', height: '110%', objectFit: 'contain' }}
               className="group-hover:scale-105 transition duration-300"
             />
           ) : (
@@ -22,7 +22,7 @@ export default function ProductCard({ product, totalHeight }) {
                 <img
                   src='https://res.cloudinary.com/dh10owmif/image/upload/v1776060127/images_sz53ic.png'
                   alt={product.name}
-                  style={{ width: '100%', height: '120%', objectFit: 'cover' }}
+                  style={{ width: '110%', height: '110%', objectFit: 'cover' }}
                   className="group-hover:scale-105 transition duration-300"
                 />
             </div>
