@@ -22,7 +22,7 @@ export default function ProductCarousel({ title, products = [] }) {
                             key={product._id}
                             className="p-2 pl-4 basis-1/2 sm:basis-1/2 lg:basis-1/3"
                         >
-                            <ProductCard product={product} totalHeight={150}></ProductCard>
+                            <ProductCard product={product} totalHeight={120}></ProductCard>
                         </CarouselItem>
                     ))}
                 </CarouselContent>

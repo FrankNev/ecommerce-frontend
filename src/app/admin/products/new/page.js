@@ -156,9 +156,9 @@ export default function NewProductPage() {
                 <Label htmlFor="description">Descripción *</Label>
                 <textarea
                   id="description" name="description" value={form.description}
-                  onChange={handleChange} required rows={3}
+                  onChange={handleChange} required rows={6}
                   placeholder="Descripción del producto..."
-                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none"
+                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-y"
                 />
               </div>
               <div className="space-y-1">

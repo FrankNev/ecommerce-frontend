@@ -14,7 +14,7 @@ export default function ProductCard({ product, totalHeight }) {
             <img
               src={image}
               alt={product.name}
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              style={{ width: '100%', height: '120%', objectFit: 'cover' }}
               className="group-hover:scale-105 transition duration-300"
             />
           ) : (
@@ -22,7 +22,7 @@ export default function ProductCard({ product, totalHeight }) {
                 <img
                   src='https://res.cloudinary.com/dh10owmif/image/upload/v1776060127/images_sz53ic.png'
                   alt={product.name}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  style={{ width: '100%', height: '120%', objectFit: 'cover' }}
                   className="group-hover:scale-105 transition duration-300"
                 />
             </div>
