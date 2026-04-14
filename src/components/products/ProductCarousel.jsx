@@ -20,7 +20,7 @@ export default function ProductCarousel({ title, products = [] }) {
                     {products.map(product => (
                         <CarouselItem
                             key={product._id}
-                            className="p-2 pl-4 basis-1/2 sm:basis-1/2 lg:basis-1/3"
+                            className="px-3 py-2 basis-auto min-w-fit"
                         >
                             <ProductCard product={product} totalHeight={120}></ProductCard>
                         </CarouselItem>
