@@ -2,6 +2,7 @@ import ProductJsonLd from '@/components/products/ProductJsonLd';
 import VariantSelector from '@/components/products/VariantSelector';
 import ProductCarousel from '@/components/products/ProductCarousel';
 import ProductImageCarousel from '@/components/products/ProductImageCarousel';
+import Breadcrumb from '@/components/ui/breadcrumb';
 import { Separator } from '@/components/ui/separator';
 
 export async function generateMetadata({ params }) {
@@ -89,9 +90,16 @@ export default async function ProductDetailPage({ params }) {
     );
   }
 
+  const breadcrumbItems = [
+    { label: 'Productos', href: '/products' },
+    { label: product.name },
+  ];
+
   return (
     <div className="max-w-7xl rounded-md mt-4 mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12 bg-white">
       <ProductJsonLd product={product} />
+
+      <Breadcrumb items={breadcrumbItems} />
 
       {/* SECCIÓN PRINCIPAL: Imagen + Info */}
       <div

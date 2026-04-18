@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import ProductCard from '@/components/products/ProductCard';
 import ProductFilters from '@/components/products/ProductFilters';
+import Breadcrumb from '@/components/ui/breadcrumb';
 
 export const metadata = {
   title: 'Productos',
@@ -56,8 +57,25 @@ export default async function ProductsPage({ searchParams }) {
     getBrands(),
   ]);
 
+  const activeCategoryId = params.category ? Number(params.category) : null;
+  const activeCategory = activeCategoryId
+    ? categories.find(c => c.id === activeCategoryId)
+    : null;
+
+  const breadcrumbItems = [
+    { label: 'Productos', href: activeCategory ? '/products' : undefined },
+    ...(activeCategory ? [{ label: activeCategory.name }] : []),
+  ];
+
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+      {/* Breadcrumb */}
+      <div className="mb-6">
+        <Breadcrumb items={breadcrumbItems} />
+      </div>
+
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Productos</h1>
         <p className="text-gray-500 mt-1">{total} productos encontrados</p>
@@ -79,7 +97,7 @@ export default async function ProductsPage({ searchParams }) {
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {products.map(product => (
-                  <ProductCard key={product._id} product={product} totalHeight={200}/>
+                  <ProductCard key={product._id} product={product} totalHeight={200} />
                 ))}
               </div>
 
