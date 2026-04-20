@@ -10,7 +10,6 @@ import {
   ClipboardList,
   LogOut,
   Tag,
-  LayoutDashboard,
   Phone,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -22,9 +21,7 @@ export default function MobileMenu({
   cartCount,
   categories,
   onLogout,
-  searchExpanded,
   onToggleSearch,
-  searchInputRef,
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -137,7 +134,7 @@ export default function MobileMenu({
           <Link href="/cart">
             <ShoppingCart size={22} />
             {cartCount > 0 && (
-              <Badge className="absolute -top-1 -right-1 px-1 min-w-[1.25rem] h-5 flex items-center justify-center text-[10px]">
+              <Badge className="absolute bg-red-500 -top-1 -right-1 px-1 min-w-[1rem] h-4 flex items-center justify-center text-[10px]">
                 {cartCount}
               </Badge>
             )}
