@@ -9,10 +9,11 @@ import {
   ClipboardList,
   FileText,
   Users,
-  ChevronRight,
+  ChevronLeft,
   PanelLeftClose,
   PanelLeftOpen,
   Store,
+  LayoutList,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -33,6 +34,12 @@ const NAV_ITEMS = [
     label: 'Productos',
     href: '/admin/products',
     icon: ShoppingBag,
+  },
+  {
+    id: 'categorias',
+    label: 'Categorías',
+    href: '/admin/categories',
+    icon: LayoutList,
   },
   {
     id: 'reportes',
@@ -67,10 +74,12 @@ export default function AdminSidebar() {
             href="/"
             className="flex items-center gap-2 text-gray-900 hover:text-black transition"
           >
+            <ChevronLeft />
             <Store size={20} className="shrink-0" />
             <span className="font-black tracking-tighter text-lg whitespace-nowrap">
               Mi Tienda
             </span>
+
           </Link>
         ) : (
           <Link href="/" aria-label="Ir al inicio">
