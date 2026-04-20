@@ -1,60 +1,60 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import useCartStore from '@/store/useCartStore';
-import useAuthStore from '@/store/useAuthStore';
 import useProductImageStore from '@/store/useProductImageStore';
-import { useRouter, usePathname } from 'next/navigation';
-import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { useAddToCart } from '@/hooks/useAddToCart';
 
-function findImageIndexForVariant(variant, images, variantIndex) {
+const COLOR_KEYS = ['color', 'colour', 'Color', 'Colour', 'COLOR'];
+
+function getAttrs(variant) {
+  if (!variant?.attributes) return {};
+  if (variant.attributes instanceof Map) return Object.fromEntries(variant.attributes);
+  if (typeof variant.attributes === 'object' && !Array.isArray(variant.attributes)) {
+    return variant.attributes;
+  }
+  return {};
+}
+
+function getColorValue(variant) {
+  const attrs = getAttrs(variant);
+  for (const key of COLOR_KEYS) {
+    if (attrs[key]) return attrs[key];
+  }
+  return null;
+}
+
+function findImageIndexForColor(colorValue, images, variants) {
   if (!images || images.length === 0) return 0;
 
-  const attrs = variant.attributes
-    ? Object.fromEntries(
-        variant.attributes instanceof Map
-          ? variant.attributes
-          : Object.entries(variant.attributes)
-      )
-    : {};
+  const normalize = (str) =>
+    str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
-  const colorKeys = ['color', 'colour', 'Color', 'Colour', 'COLOR'];
-  let colorValue = null;
-  for (const key of colorKeys) {
-    if (attrs[key]) { colorValue = attrs[key]; break; }
-  }
+  const normalizedColor = normalize(colorValue);
 
-  if (colorValue) {
-    const normalize = (str) =>
-      str
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '');
+  // Intento 1: match por nombre en URL o public_id
+  const urlMatch = images.findIndex((img) => {
+    const haystack = normalize(img.url + ' ' + (img.public_id || ''));
+    return haystack.includes(normalizedColor);
+  });
+  if (urlMatch !== -1) return urlMatch;
 
-    const normalizedColor = normalize(colorValue);
+  // Intento 2: índice de la primera variante con ese color
+  const firstVariantIndex = variants.findIndex(
+    (v) => normalize(getColorValue(v) || '') === normalizedColor
+  );
+  if (firstVariantIndex !== -1) return Math.min(firstVariantIndex, images.length - 1);
 
-    const matchIdx = images.findIndex((img) => {
-      const haystack = normalize(img.url + ' ' + (img.public_id || ''));
-      return haystack.includes(normalizedColor);
-    });
-
-    if (matchIdx !== -1) return matchIdx;
-  }
-
-  return Math.min(variantIndex, images.length - 1);
+  return 0;
 }
 
 export default function VariantSelector({ product }) {
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [quantity, setQuantity] = useState(1);
-  const addItem = useCartStore(state => state.addItem);
-  const user = useAuthStore(state => state.user);
   const { setActiveIndex, reset } = useProductImageStore();
-  const router = useRouter();
-  const pathname = usePathname();
+  const { addToCart } = useAddToCart();
 
   const hasVariants = product.variants && product.variants.length > 0;
 
@@ -66,57 +66,33 @@ export default function VariantSelector({ product }) {
 
   useEffect(() => {
     if (hasVariants && product.variants.length === 1) {
-      handleVariantSelect(product.variants[0], 0);
+      handleVariantSelect(product.variants[0], null);
     }
     return () => reset();
   }, []);
 
-  const handleVariantSelect = (variant, variantIndex) => {
-    setSelectedVariant(variant);
-    setQuantity(1);
-    const imgIdx = findImageIndexForVariant(variant, product.images, variantIndex);
-    setActiveIndex(imgIdx);
-  };
+  const handleVariantSelect = (newVariant, prevVariant) => {
+    const prevColor = getColorValue(prevVariant ?? selectedVariant);
+    const newColor = getColorValue(newVariant);
 
-  const getVariantAttributes = (variant) => {
-    if (!variant.attributes) return {};
-    if (variant.attributes instanceof Map) {
-      return Object.fromEntries(variant.attributes);
+    setSelectedVariant(newVariant);
+    setQuantity(1);
+
+    if (newColor && newColor !== prevColor) {
+      const idx = findImageIndexForColor(newColor, product.images, product.variants);
+      setActiveIndex(idx);
     }
-    if (typeof variant.attributes === 'object' && !Array.isArray(variant.attributes)) {
-      return variant.attributes;
-    }
-    return {};
   };
 
   const variantAttributeKeys = hasVariants
-    ? [...new Set(
-        product.variants.flatMap(v => Object.keys(getVariantAttributes(v)))
-      )]
+    ? [...new Set(product.variants.flatMap(v => Object.keys(getAttrs(v))))]
     : [];
 
-  const getUniqueValues = (key) => {
-    return [...new Set(
-      product.variants.map(v => getVariantAttributes(v)[key]).filter(Boolean)
-    )];
-  };
+  const getUniqueValues = (key) =>
+    [...new Set(product.variants.map(v => getAttrs(v)[key]).filter(Boolean))];
 
   const handleAddToCart = () => {
-    if (!user) {
-      toast.error('Debés iniciar sesión para agregar al carrito');
-      router.push(`/login?redirect=${pathname}`);
-      return;
-    }
-    if (hasVariants && !selectedVariant) {
-      toast.error('Seleccioná una variante antes de continuar');
-      return;
-    }
-    if (currentStock === 0) {
-      toast.error('Producto sin stock');
-      return;
-    }
-    addItem({ ...product, selectedVariant }, quantity);
-    toast.success('Producto agregado al carrito');
+    addToCart(product, quantity, hasVariants ? selectedVariant : null);
   };
 
   return (
@@ -151,29 +127,25 @@ export default function VariantSelector({ product }) {
               <p className="text-sm font-semibold text-gray-700 capitalize">{attrKey}</p>
               <div className="flex flex-wrap gap-2">
                 {getUniqueValues(attrKey).map(value => {
-                  const variantIndex = product.variants.findIndex(v =>
-                    getVariantAttributes(v)[attrKey] === value
+                  const matchingVariant = product.variants.find(v =>
+                    getAttrs(v)[attrKey] === value
                   );
-                  const matchingVariant = product.variants[variantIndex];
                   const isSelected = selectedVariant
-                    ? getVariantAttributes(selectedVariant)[attrKey] === value
+                    ? getAttrs(selectedVariant)[attrKey] === value
                     : false;
                   const isOutOfStock = (matchingVariant?.stock ?? 0) === 0;
 
                   return (
                     <button
                       key={value}
-                      onClick={() =>
-                        !isOutOfStock && handleVariantSelect(matchingVariant, variantIndex)
-                      }
+                      onClick={() => !isOutOfStock && handleVariantSelect(matchingVariant)}
                       disabled={isOutOfStock}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium border transition-all ${
-                        isSelected
+                      className={`px-4 py-2 rounded-lg text-sm font-medium border transition-all ${isSelected
                           ? 'bg-black text-white border-black'
                           : isOutOfStock
                             ? 'border-gray-200 text-gray-300 cursor-not-allowed line-through'
                             : 'border-gray-300 text-gray-700 hover:border-black hover:text-black'
-                      }`}
+                        }`}
                     >
                       {value}
                     </button>
