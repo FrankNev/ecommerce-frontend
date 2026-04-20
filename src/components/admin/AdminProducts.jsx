@@ -1,0 +1,104 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { ecommerceAPI } from '@/lib/axios';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from '@/components/ui/table';
+
+export default function AdminProducts() {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const { data } = await ecommerceAPI.get('/api/products');
+      setProducts(data.products);
+    } catch {
+      toast.error('Error al cargar productos');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteProduct = async (id) => {
+    if (!confirm('¿Estás seguro de eliminar este producto?')) return;
+    try {
+      await ecommerceAPI.delete(`/api/products/${id}`);
+      setProducts(products.filter(p => p._id !== id));
+      toast.success('Producto eliminado');
+    } catch {
+      toast.error('Error al eliminar producto');
+    }
+  };
+
+  if (loading) {
+    return <div className="py-16 text-center text-gray-400 text-sm">Cargando productos...</div>;
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle>Productos ({products.length})</CardTitle>
+          <Button size="sm" onClick={() => router.push('/admin/products/new')}>
+            + Nuevo producto
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Nombre</TableHead>
+              <TableHead>Precio</TableHead>
+              <TableHead>Stock</TableHead>
+              <TableHead>Acciones</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {products.map(product => (
+              <TableRow key={product._id}>
+                <TableCell className="font-medium">{product.name}</TableCell>
+                <TableCell>${product.price.toLocaleString('es-AR')}</TableCell>
+                <TableCell>
+                  <Badge variant={product.stock > 0 ? 'default' : 'destructive'}>
+                    {product.stock}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => router.push(`/admin/products/${product._id}/edit`)}
+                    >
+                      Editar
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleDeleteProduct(product._id)}
+                    >
+                      Eliminar
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  );
+}

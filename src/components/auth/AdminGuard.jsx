@@ -17,9 +17,7 @@ export default function AdminGuard({ children }) {
     if (user.role !== 'admin') { router.push('/'); return; }
   }, [mounted, user]);
 
-  if (!mounted || !user || user.role !== 'admin') {
-    return null; // No renderiza nada hasta verificar
-  }
+  if (!mounted || !user || user.role !== 'admin') return null;
 
-  return children;
+  return <>{children}</>;
 }
