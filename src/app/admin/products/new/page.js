@@ -10,6 +10,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AdminGuard from '@/components/auth/AdminGuard';
+import ImageVariantMapper from '@/components/admin/ImageVariantMapper';
+
+const genId = () => Math.random().toString(36).slice(2, 10);
 
 export default function NewProductPage() {
   const router = useRouter();
@@ -22,9 +25,9 @@ export default function NewProductPage() {
   const [mounted, setMounted] = useState(false);
   const [attributes, setAttributes] = useState([{ key: '', value: '' }]);
   const [variants, setVariants] = useState([]);
+  const [imageVariantMap, setImageVariantMap] = useState({});
   const [form, setForm] = useState({
-    name: '', description: '', price: '', stock: '',
-    category_id: '', brand: '',
+    name: '', description: '', price: '', stock: '', category_id: '', brand: '',
   });
 
   useEffect(() => { setMounted(true); }, []);
@@ -37,7 +40,6 @@ export default function NewProductPage() {
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  // Atributos generales
   const handleAttributeChange = (index, field, value) => {
     const updated = [...attributes];
     updated[index][field] = value;
@@ -46,36 +48,77 @@ export default function NewProductPage() {
   const addAttribute = () => setAttributes([...attributes, { key: '', value: '' }]);
   const removeAttribute = (index) => setAttributes(attributes.filter((_, i) => i !== index));
 
-  // Variantes
   const addVariant = () => setVariants([...variants, {
-    name: '', price: '', stock: '', attributes: [{ key: '', value: '' }]
+    clientId: genId(), name: '', price: '', stock: '',
+    attributes: [{ key: '', value: '' }],
   }]);
-  const removeVariant = (index) => setVariants(variants.filter((_, i) => i !== index));
-  const updateVariant = (index, field, value) => {
-    const updated = [...variants];
-    updated[index][field] = value;
-    setVariants(updated);
+
+  const removeVariant = (clientId) => {
+    setVariants(variants.filter(v => v.clientId !== clientId));
+    // Limpiar referencias en imageVariantMap
+    setImageVariantMap(prev => {
+      const next = { ...prev };
+      Object.keys(next).forEach(k => {
+        next[k] = next[k].filter(id => id !== clientId);
+      });
+      return next;
+    });
   };
-  const addVariantAttribute = (vIndex) => {
-    const updated = [...variants];
-    updated[vIndex].attributes.push({ key: '', value: '' });
-    setVariants(updated);
-  };
-  const updateVariantAttribute = (vIndex, aIndex, field, value) => {
-    const updated = [...variants];
-    updated[vIndex].attributes[aIndex][field] = value;
-    setVariants(updated);
-  };
-  const removeVariantAttribute = (vIndex, aIndex) => {
-    const updated = [...variants];
-    updated[vIndex].attributes = updated[vIndex].attributes.filter((_, i) => i !== aIndex);
-    setVariants(updated);
-  };
+
+  const updateVariant = (clientId, field, value) =>
+    setVariants(variants.map(v => v.clientId === clientId ? { ...v, [field]: value } : v));
+
+  const addVariantAttribute = (clientId) =>
+    setVariants(variants.map(v =>
+      v.clientId === clientId
+        ? { ...v, attributes: [...v.attributes, { key: '', value: '' }] }
+        : v
+    ));
+
+  const updateVariantAttribute = (clientId, aIndex, field, value) =>
+    setVariants(variants.map(v =>
+      v.clientId === clientId
+        ? { ...v, attributes: v.attributes.map((a, i) => i === aIndex ? { ...a, [field]: value } : a) }
+        : v
+    ));
+
+  const removeVariantAttribute = (clientId, aIndex) =>
+    setVariants(variants.map(v =>
+      v.clientId === clientId
+        ? { ...v, attributes: v.attributes.filter((_, i) => i !== aIndex) }
+        : v
+    ));
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
+    const startIdx = images.length;
     setImages(prev => [...prev, ...files]);
-    setPreviews(prev => [...prev, ...files.map(f => URL.createObjectURL(f))]);
+    setPreviews(prev => [
+      ...prev,
+      ...files.map((f, i) => ({
+        src: URL.createObjectURL(f),
+        label: f.name,
+        key: String(startIdx + i),
+      })),
+    ]);
+  };
+
+  const removeImage = (idx) => {
+    setImages(prev => prev.filter((_, i) => i !== idx));
+    setPreviews(prev => {
+      const removed = prev[idx];
+      const next = prev.filter((_, i) => i !== idx);
+      return next.map((p, i) => ({ ...p, key: String(i) }));
+    });
+    setImageVariantMap(prev => {
+      const next = {};
+      Object.entries(prev).forEach(([k, v]) => {
+        const ki = Number(k);
+        if (ki < idx) next[String(ki)] = v;
+        else if (ki > idx) next[String(ki - 1)] = v;
+      });
+      return next;
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -92,9 +135,7 @@ export default function NewProductPage() {
         formData.append('price', form.price);
         formData.append('stock', form.stock);
       } else {
-        // Precio base = precio mínimo de variantes
-        const minPrice = Math.min(...variants.map(v => Number(v.price) || 0));
-        formData.append('price', minPrice);
+        formData.append('price', Math.min(...variants.map(v => Number(v.price) || 0)));
         formData.append('stock', 0);
       }
 
@@ -106,6 +147,7 @@ export default function NewProductPage() {
 
       if (hasVariants) {
         const formattedVariants = variants.map(v => ({
+          clientId: v.clientId,
           name: v.name,
           price: Number(v.price),
           stock: Number(v.stock),
@@ -116,6 +158,10 @@ export default function NewProductPage() {
         formData.append('variants', JSON.stringify(formattedVariants));
       }
 
+      if (hasVariants) {
+        formData.append('image_variant_map', JSON.stringify(imageVariantMap));
+      }
+
       images.forEach(img => formData.append('images', img));
 
       await ecommerceAPI.post('/api/products', formData, {
@@ -123,13 +169,15 @@ export default function NewProductPage() {
       });
 
       toast.success('Producto creado correctamente');
-      router.push('/admin');
+      router.push('/admin/products');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Error al crear producto');
     } finally {
       setLoading(false);
     }
   };
+
+  const mappableVariants = variants.filter(v => v.name.trim());
 
   return (
     <AdminGuard>
@@ -173,18 +221,17 @@ export default function NewProductPage() {
                 </select>
               </div>
 
-              {/* Toggle variantes */}
               <div className="flex items-center gap-3 pt-2">
                 <input
-                  type="checkbox"
-                  id="hasVariants"
-                  checked={hasVariants}
+                  type="checkbox" id="hasVariants" checked={hasVariants}
                   onChange={(e) => {
                     setHasVariants(e.target.checked);
-                    if (e.target.checked) setVariants([{
-                      name: '', price: '', stock: '', attributes: [{ key: '', value: '' }]
-                    }]);
-                    else setVariants([]);
+                    if (e.target.checked) {
+                      setVariants([{ clientId: genId(), name: '', price: '', stock: '', attributes: [{ key: '', value: '' }] }]);
+                    } else {
+                      setVariants([]);
+                      setImageVariantMap({});
+                    }
                   }}
                   className="w-4 h-4 cursor-pointer"
                 />
@@ -193,7 +240,6 @@ export default function NewProductPage() {
                 </Label>
               </div>
 
-              {/* Precio y stock solo si no tiene variantes */}
               {!hasVariants && (
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                   <div className="space-y-1">
@@ -209,7 +255,7 @@ export default function NewProductPage() {
             </CardContent>
           </Card>
 
-          {/* Atributos generales */}
+          {/* Especificaciones generales */}
           <Card>
             <CardHeader>
               <div className="flex justify-between items-center">
@@ -245,30 +291,32 @@ export default function NewProductPage() {
               </CardHeader>
               <CardContent className="space-y-6">
                 {variants.map((variant, vIndex) => (
-                  <div key={vIndex} className="border border-gray-200 rounded-xl p-4 space-y-4">
+                  <div key={variant.clientId} className="border border-gray-200 rounded-xl p-4 space-y-4">
                     <div className="flex justify-between items-center">
-                      <p className="text-sm font-semibold text-gray-700">Variante {vIndex + 1}</p>
+                      <p className="text-sm font-semibold text-gray-700">
+                        {variant.name || `Variante ${vIndex + 1}`}
+                      </p>
                       <Button type="button" variant="ghost" size="sm"
                         className="text-red-400 hover:text-red-600"
-                        onClick={() => removeVariant(vIndex)}>✕</Button>
+                        onClick={() => removeVariant(variant.clientId)}>✕</Button>
                     </div>
 
                     <div className="space-y-1">
                       <Label>Nombre *</Label>
                       <Input placeholder="Ej: Negro 128GB" value={variant.name}
-                        onChange={(e) => updateVariant(vIndex, 'name', e.target.value)} />
+                        onChange={(e) => updateVariant(variant.clientId, 'name', e.target.value)} />
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                       <div className="space-y-1">
                         <Label>Precio *</Label>
                         <Input type="number" placeholder="999999" value={variant.price}
-                          onChange={(e) => updateVariant(vIndex, 'price', e.target.value)} />
+                          onChange={(e) => updateVariant(variant.clientId, 'price', e.target.value)} />
                       </div>
                       <div className="space-y-1">
                         <Label>Stock *</Label>
-                        <Input type="number" placeholder="10" value={variant.stock}
-                          onChange={(e) => updateVariant(vIndex, 'stock', e.target.value)} />
+                        <Input type="number" placeholder="10" min="0" value={variant.stock}
+                          onChange={(e) => updateVariant(variant.clientId, 'stock', e.target.value)} />
                       </div>
                     </div>
 
@@ -276,19 +324,19 @@ export default function NewProductPage() {
                       <div className="flex justify-between items-center">
                         <Label>Atributos diferenciadores</Label>
                         <Button type="button" variant="ghost" size="sm"
-                          onClick={() => addVariantAttribute(vIndex)}>+ Atributo</Button>
+                          onClick={() => addVariantAttribute(variant.clientId)}>+ Atributo</Button>
                       </div>
                       <p className="text-xs text-gray-400">Ej: Color → Negro, Almacenamiento → 128GB</p>
                       {variant.attributes.map((attr, aIndex) => (
                         <div key={aIndex} className="flex gap-2 items-center">
                           <Input placeholder="Ej: Color" value={attr.key}
-                            onChange={(e) => updateVariantAttribute(vIndex, aIndex, 'key', e.target.value)} />
+                            onChange={(e) => updateVariantAttribute(variant.clientId, aIndex, 'key', e.target.value)} />
                           <Input placeholder="Ej: Negro" value={attr.value}
-                            onChange={(e) => updateVariantAttribute(vIndex, aIndex, 'value', e.target.value)} />
+                            onChange={(e) => updateVariantAttribute(variant.clientId, aIndex, 'value', e.target.value)} />
                           {variant.attributes.length > 1 && (
                             <Button type="button" variant="ghost" size="sm"
                               className="text-red-400 hover:text-red-600 shrink-0"
-                              onClick={() => removeVariantAttribute(vIndex, aIndex)}>✕</Button>
+                              onClick={() => removeVariantAttribute(variant.clientId, aIndex)}>✕</Button>
                           )}
                         </div>
                       ))}
@@ -305,31 +353,41 @@ export default function NewProductPage() {
             <CardContent className="space-y-4">
               {previews.length > 0 && (
                 <div className="space-y-2">
-                  {previews.map((url, i) => (
-                    <div key={i} className="flex items-center gap-4 p-3 border border-gray-200 rounded-lg">
-                      <img src={url} alt={`Preview ${i + 1}`}
+                  {previews.map((preview, i) => (
+                    <div key={preview.key} className="flex items-center gap-4 p-3 border border-gray-200 rounded-lg">
+                      <img src={preview.src} alt={preview.label}
                         style={{ width: '64px', height: '64px', objectFit: 'cover' }}
-                        className="rounded-lg" />
+                        className="rounded-lg shrink-0" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-700 truncate">{images[i]?.name}</p>
+                        <p className="text-sm font-medium text-gray-700 truncate">{preview.label}</p>
                         <p className="text-xs text-gray-400">{(images[i]?.size / 1024).toFixed(0)} KB</p>
                       </div>
                       <Button type="button" variant="ghost" size="sm"
                         className="text-red-400 hover:text-red-600 shrink-0"
-                        onClick={() => {
-                          setImages(images.filter((_, idx) => idx !== i));
-                          setPreviews(previews.filter((_, idx) => idx !== i));
-                        }}>✕</Button>
+                        onClick={() => removeImage(i)}>✕</Button>
                     </div>
                   ))}
                 </div>
               )}
+
               <label className="flex items-center justify-center gap-2 w-full border-2 border-dashed border-gray-200 rounded-lg p-6 cursor-pointer hover:border-gray-400 transition-colors">
                 <span className="text-sm text-gray-500">
                   {previews.length > 0 ? '+ Agregar más imágenes' : 'Seleccionar imágenes'}
                 </span>
                 <input type="file" multiple accept="image/*" onChange={handleImageChange} className="hidden" />
               </label>
+
+              {/* Mapper imagen → variante */}
+              {hasVariants && previews.length > 0 && mappableVariants.length > 0 && (
+                <div className="border-t border-gray-100 pt-4">
+                  <ImageVariantMapper
+                    images={previews}
+                    variants={mappableVariants}
+                    value={imageVariantMap}
+                    onChange={setImageVariantMap}
+                  />
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -337,7 +395,7 @@ export default function NewProductPage() {
             <Button type="submit" className="flex-1" disabled={loading}>
               {loading ? 'Creando...' : 'Crear producto'}
             </Button>
-            <Button type="button" className="flex-1 bg-white text-black" onClick={() => router.push('/admin')}>
+            <Button type="button" variant="outline" className="flex-1" onClick={() => router.push('/admin/products')}>
               Cancelar
             </Button>
           </div>
