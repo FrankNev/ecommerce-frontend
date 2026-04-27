@@ -147,7 +147,7 @@ export default function ContactPage() {
                   name="mensaje"
                   value={form.mensaje}
                   onChange={handleChange}
-                  placeholder="Cuéntanos cómo podemos ayudarte..."
+                  placeholder="Comentanos en qué podemos ayudarte..."
                   rows={6}
                   disabled={loading}
                   className="w-full border border-gray-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-y"
