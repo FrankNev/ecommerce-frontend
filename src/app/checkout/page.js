@@ -6,6 +6,8 @@ import { toast } from 'sonner';
 import { ecommerceAPI } from '@/lib/axios';
 import useCartStore from '@/store/useCartStore';
 import useAuthStore from '@/store/useAuthStore';
+import { usePromotions } from '@/hooks/usePromotions';
+import { calculateFinalPrice } from '@/lib/priceEngine';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,6 +26,7 @@ const PROVINCIAS = [
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, getTotal, clearCart } = useCartStore();
+  const { promotions } = usePromotions();
   const user = useAuthStore(state => state.user);
   const [loading, setLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('mercadopago');
@@ -39,6 +42,7 @@ export default function CheckoutPage() {
     direccion: '', numero: '', piso: '',
     ciudad: '', provincia: '', codigo_postal: '',
   });
+  const rawTotal = getTotal();
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -50,7 +54,6 @@ export default function CheckoutPage() {
   const handleChange = (e) => setShipping({ ...shipping, [e.target.name]: e.target.value });
 
   const validateShipping = () => {
-    // Para retiro en local, no necesita validar dirección
     if (shippingType === 'pickup') return true;
 
     const required = ['nombre', 'apellido', 'telefono', 'direccion', 'numero', 'ciudad', 'provincia', 'codigo_postal'];
@@ -63,13 +66,18 @@ export default function CheckoutPage() {
     return true;
   };
 
+  const promoTotal = items.reduce((acc, { product, quantity }) => {
+    const base = { ...product, price: product.selectedVariant?.price ?? product.price };
+    const { finalPrice } = calculateFinalPrice(base, promotions, { cartTotal: rawTotal });
+    return acc + finalPrice * quantity;
+  }, 0);
+
   const getDiscountedTotal = () => {
     if (paymentMethod !== 'transfer' || !bankInfo) return null;
-    const discount = getTotal() * (bankInfo.discountPercent / 100);
-    return getTotal() - discount;
+    return promoTotal - promoTotal * (bankInfo.discountPercent / 100);
   };
 
-  const finalTotal = getDiscountedTotal() ?? getTotal();
+  const finalTotal = getDiscountedTotal() ?? promoTotal;
 
   const handleCheckout = async () => {
     if (!user) { router.push('/login?redirect=/checkout'); return; }
@@ -393,15 +401,29 @@ export default function CheckoutPage() {
             <Separator />
 
             {/* Total con descuento */}
+            {promoTotal < rawTotal && (
+              <>
+                <div className="flex justify-between text-sm text-gray-500">
+                  <span>Subtotal</span>
+                  <span>${rawTotal.toLocaleString('es-AR')}</span>
+                </div>
+                <div className="flex justify-between text-sm text-green-600 font-medium">
+                  <span>Descuento aplicado</span>
+                  <span>-${(rawTotal - promoTotal).toLocaleString('es-AR')}</span>
+                </div>
+                <Separator />
+              </>
+            )}
+
             {paymentMethod === 'transfer' && bankInfo && (
               <>
                 <div className="flex justify-between text-sm text-gray-500">
                   <span>Subtotal</span>
-                  <span>${getTotal().toLocaleString('es-AR')}</span>
+                  <span>${promoTotal.toLocaleString('es-AR')}</span>
                 </div>
                 <div className="flex justify-between text-sm text-green-600 font-medium">
                   <span>Descuento por transferencia ({bankInfo.discountPercent}%)</span>
-                  <span>-${(getTotal() * bankInfo.discountPercent / 100).toLocaleString('es-AR')}</span>
+                  <span>-${(promoTotal * bankInfo.discountPercent / 100).toLocaleString('es-AR')}</span>
                 </div>
                 <Separator />
               </>
