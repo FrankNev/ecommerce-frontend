@@ -3,12 +3,17 @@
 import Link from 'next/link';
 import { ShoppingCart } from 'lucide-react';
 import { useAddToCart } from '@/hooks/useAddToCart';
+import { usePromotions } from '@/hooks/usePromotions';
 
 export default function ProductCard({ product, totalHeight }) {
   const image = product.images?.[0]?.url;
   const isOutOfStock = product.stock === 0;
   const hasVariants = product.variants && product.variants.length > 0;
   const { addToCart } = useAddToCart();
+  const { getProductPrice } = usePromotions();
+
+  const { finalPrice, discountAmount, appliedPromotion } = getProductPrice(product);
+  const hasDiscount = discountAmount > 0;
 
   return (
     <div className="group bg-white rounded-2md overflow-hidden shadow-sm hover:shadow-md transition" style={{ minWidth: 200 }}>
@@ -38,6 +43,15 @@ export default function ProductCard({ product, totalHeight }) {
               </span>
             </div>
           )}
+
+          {/* Badge promoción */}
+          {hasDiscount && !isOutOfStock && (
+            <div className="absolute top-2 left-2">
+              <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                {appliedPromotion.name}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Info */}
@@ -48,13 +62,21 @@ export default function ProductCard({ product, totalHeight }) {
           <h3 className="font-semibold text-gray-900 group-hover:text-black transition line-clamp-2">
             {product.name}
           </h3>
-          <p className="text-lg font-bold text-gray-900 mt-2">
-            ${product.price.toLocaleString('es-AR')}
-          </p>
+
+          <div className="mt-2 space-y-0.5">
+            {hasDiscount && (
+              <p className="text-sm text-gray-400 line-through">
+                ${product.price.toLocaleString('es-AR')}
+              </p>
+            )}
+            <p className={`text-md font-semibold ${hasDiscount ? 'text-green-600' : 'text-gray-900'}`}>
+              ${finalPrice.toLocaleString('es-AR')}
+            </p>
+          </div>
         </div>
       </Link>
 
-      {/* Botón fuera del Link para evitar navegación al hacer click */}
+      {/* Botón compra/ver variantes*/}
       <div className="px-4 pb-4">
         <button
           onClick={() => addToCart(product)}
@@ -62,9 +84,7 @@ export default function ProductCard({ product, totalHeight }) {
           className={`w-full py-2 rounded-lg text-sm font-semibold transition flex items-center justify-center gap-2
             ${isOutOfStock
               ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              : hasVariants
-                ? 'bg-gray-900 text-white hover:bg-gray-700'
-                : 'bg-gray-900 text-white hover:bg-gray-700'
+              : 'bg-gray-900 text-white hover:bg-gray-700'
             }`}
         >
           <ShoppingCart size={16} />
