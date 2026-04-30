@@ -14,44 +14,30 @@ import {
   PanelLeftOpen,
   Store,
   LayoutList,
+  Zap,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
   {
-    id: 'metricas',
-    label: 'Métricas',
-    href: '/admin/metrics',
-    icon: BarChart2,
+    id: 'metricas', label: 'Métricas', href: '/admin/metrics', icon: BarChart2,
   },
   {
-    id: 'ordenes',
-    label: 'Órdenes',
-    href: '/admin/orders',
-    icon: ClipboardList,
+    id: 'ordenes', label: 'Órdenes', href: '/admin/orders', icon: ClipboardList,
   },
   {
-    id: 'productos',
-    label: 'Productos',
-    href: '/admin/products',
-    icon: ShoppingBag,
+    id: 'productos', label: 'Productos', href: '/admin/products', icon: ShoppingBag,
   },
   {
-    id: 'categorias',
-    label: 'Categorías',
-    href: '/admin/categories',
-    icon: LayoutList,
+    id: 'categorias', label: 'Categorías', href: '/admin/categories', icon: LayoutList,
   },
   {
-    id: 'reportes',
-    label: 'Reportes',
-    href: '/admin/reports',
-    icon: FileText,
+    id: 'ofertas', label: 'Ofertas', href: '/admin/offers', icon: Zap,
   },
   {
-    id: 'clientes',
-    label: 'Clientes',
-    href: '/admin/clients',
-    icon: Users,
+    id: 'reportes', label: 'Reportes', href: '/admin/reports', icon: FileText,
+  },
+  {
+    id: 'clientes', label: 'Clientes', href: '/admin/clients', icon: Users,
   },
 ];
 
@@ -117,9 +103,8 @@ export default function AdminSidebar() {
 
                   <Icon
                     size={18}
-                    className={`shrink-0 transition-colors ${
-                      isActive ? 'text-gray-900' : 'text-gray-400 group-hover:text-gray-700'
-                    }`}
+                    className={`shrink-0 transition-colors ${isActive ? 'text-gray-900' : 'text-gray-400 group-hover:text-gray-700'
+                      }`}
                   />
 
                   {expanded && (
