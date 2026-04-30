@@ -6,10 +6,10 @@ import { Plus, Zap } from 'lucide-react';
 import { ecommerceAPI } from '@/lib/axios';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import PromotionStatsRow  from './promotions/PromotionStatsRow';
-import PromotionCard      from './promotions/PromotionCard';
-import PromotionFormDialog from './promotions/PromotionFormDialog';
-import PricePreviewDialog  from './promotions/PricePreviewDialog';
+import PromotionStatsRow  from './PromotionStatsRow';
+import PromotionCard      from './PromotionCard';
+import PromotionFormDialog from './PromotionFormDialog';
+import PricePreviewDialog  from './PricePreviewDialog';
 
 export default function AdminPromotions() {
   const [promotions, setPromotions]       = useState([]);
