@@ -51,6 +51,7 @@ export default function NavbarCategories({ categories, user }) {
             ) : (
               <Link
                 href="/contact"
+                prefetch={false}
                 className="text-sm text-gray-600 hover:text-black transition-colors font-medium"
               >
                 Contacto

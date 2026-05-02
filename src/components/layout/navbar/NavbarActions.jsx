@@ -46,11 +46,11 @@ export default function NavbarActions({ user, cartCount, onLogout }) {
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild className="cursor-pointer gap-2">
-              <Link href="/orders"><ClipboardList size={16} /> Mis órdenes</Link>
+              <Link href="/orders" prefetch={false}><ClipboardList size={16} /> Mis órdenes</Link>
             </DropdownMenuItem>
             {user.role === 'admin' && (
               <DropdownMenuItem asChild className="cursor-pointer gap-2">
-                <Link href="/admin"><Shield size={16} /> Panel admin</Link>
+                <Link href="/admin" prefetch={false}><Shield size={16} /> Panel admin</Link>
               </DropdownMenuItem>
             )}
             <DropdownMenuSeparator />
