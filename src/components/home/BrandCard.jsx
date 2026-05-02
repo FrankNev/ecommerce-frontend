@@ -4,6 +4,7 @@ export default function BrandCard({ brand }) {
   return (
     <Link
       href={`/products?brand=${encodeURIComponent(brand.name)}`}
+      prefetch={false}
       className="group bg-white rounded-full border border-gray-100 shadow-md hover:shadow-xl transition flex flex-col items-center justify-center gap-3"
       style={{ width: '140px', height: '140px' }}
     >

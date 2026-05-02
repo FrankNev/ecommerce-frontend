@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   BarChart2,
   ShoppingBag,
@@ -18,32 +17,19 @@ import {
 } from 'lucide-react';
 
 const NAV_ITEMS = [
-  {
-    id: 'metricas', label: 'Métricas', href: '/admin/metrics', icon: BarChart2,
-  },
-  {
-    id: 'ordenes', label: 'Órdenes', href: '/admin/orders', icon: ClipboardList,
-  },
-  {
-    id: 'productos', label: 'Productos', href: '/admin/products', icon: ShoppingBag,
-  },
-  {
-    id: 'categorias', label: 'Categorías', href: '/admin/categories', icon: LayoutList,
-  },
-  {
-    id: 'ofertas', label: 'Ofertas', href: '/admin/offers', icon: Zap,
-  },
-  {
-    id: 'reportes', label: 'Reportes', href: '/admin/reports', icon: FileText,
-  },
-  {
-    id: 'clientes', label: 'Clientes', href: '/admin/clients', icon: Users,
-  },
+  { id: 'metricas', label: 'Métricas', href: '/admin/metrics', icon: BarChart2 },
+  { id: 'ordenes', label: 'Órdenes', href: '/admin/orders', icon: ClipboardList },
+  { id: 'productos', label: 'Productos', href: '/admin/products', icon: ShoppingBag },
+  { id: 'categorias', label: 'Categorías', href: '/admin/categories', icon: LayoutList },
+  { id: 'ofertas', label: 'Ofertas', href: '/admin/offers', icon: Zap },
+  { id: 'reportes', label: 'Reportes', href: '/admin/reports', icon: FileText },
+  { id: 'clientes', label: 'Clientes', href: '/admin/clients', icon: Users },
 ];
 
 export default function AdminSidebar() {
   const [expanded, setExpanded] = useState(true);
   const pathname = usePathname();
+  const router = useRouter();
 
   return (
     <aside
@@ -56,8 +42,8 @@ export default function AdminSidebar() {
         style={{ padding: expanded ? '0 1.25rem' : '0', justifyContent: expanded ? 'flex-start' : 'center' }}
       >
         {expanded ? (
-          <Link
-            href="/"
+          <button
+            onClick={() => router.push('/')}
             className="flex items-center gap-2 text-gray-900 hover:text-black transition"
           >
             <ChevronLeft />
@@ -65,12 +51,11 @@ export default function AdminSidebar() {
             <span className="font-black tracking-tighter text-lg whitespace-nowrap">
               Mi Tienda
             </span>
-
-          </Link>
+          </button>
         ) : (
-          <Link href="/" aria-label="Ir al inicio">
+          <button onClick={() => router.push('/')} aria-label="Ir al inicio">
             <Store size={20} className="text-gray-700 hover:text-black transition" />
-          </Link>
+          </button>
         )}
       </div>
 
@@ -84,11 +69,11 @@ export default function AdminSidebar() {
 
             return (
               <li key={item.id}>
-                <Link
-                  href={item.href}
+                <button
+                  onClick={() => router.push(item.href)}
                   title={!expanded ? item.label : undefined}
                   className={`
-                    relative flex items-center h-10 text-sm font-medium transition-colors group
+                    w-full relative flex items-center h-10 text-sm font-medium transition-colors group
                     ${expanded ? 'px-4 gap-3' : 'justify-center'}
                     ${isActive
                       ? 'text-gray-900 bg-gray-100'
@@ -121,7 +106,7 @@ export default function AdminSidebar() {
                       {item.label}
                     </span>
                   )}
-                </Link>
+                </button>
               </li>
             );
           })}

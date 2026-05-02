@@ -32,7 +32,7 @@ export default function NavbarCategories({ categories, user }) {
               <DropdownMenuContent align="start">
                 {categories.map(cat => (
                   <DropdownMenuItem asChild key={cat.id} className="cursor-pointer">
-                    <Link href={`/products?category=${cat.id}`}>{cat.name}</Link>
+                    <Link href={`/products?category=${cat.id}`} prefetch={false}>{cat.name}</Link>
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
@@ -43,6 +43,7 @@ export default function NavbarCategories({ categories, user }) {
             {user?.role === 'admin' ? (
               <Link
                 href="/admin"
+                prefetch={false}
                 className="text-sm text-gray-600 hover:text-black transition-colors font-medium flex items-center gap-1"
               >
                 <Shield size={14} /> Panel Admin
