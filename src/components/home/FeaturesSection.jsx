@@ -1,23 +1,25 @@
+import { BadgeCheck, Truck, ShieldCheck, MessagesSquare } from 'lucide-react';
+
 const FEATURES = [
   {
-    svg: 'https://www.svgrepo.com/show/236649/delivery-truck-truck.svg',
-    title: 'Envío gratis',
+    icon: Truck,
+    title: 'Envío gratis a todo el país',
     description: 'En compras mayores a $500.000',
   },
   {
-    svg: 'https://www.svgrepo.com/show/9324/secure-payment.svg',
+    icon: ShieldCheck,
     title: 'Pago seguro',
     description: 'Con MercadoPago y todos los medios',
   },
   {
-    svg: 'https://www.svgrepo.com/show/448881/warranty.svg',
+    icon: BadgeCheck,
     title: '30 días de garantía',
-    description: 'Devolución sin preguntas',
+    description: 'Devolución por fallos de fábrica',
   },
   {
-    svg: 'https://www.svgrepo.com/show/486865/support.svg',
-    title: 'Soporte 24/7',
-    description: 'Estamos para ayudarte',
+    icon: MessagesSquare,
+    title: 'Soporte directo',
+    description: 'Estamos para ayudarte y resolver tus dudas',
   },
 ];
 
@@ -32,24 +34,20 @@ export default function FeaturesSection() {
           gap: '1.5rem',
         }}
       >
-        {FEATURES.map((feature, i) => (
+        {FEATURES.map(({ title, description, icon: Icon }) => (
           <div
-            key={i}
-            className="bg-white rounded-md border border-gray-100 shadow-sm p-6 flex flex-col items-center text-center gap-4"
+            key={title}
+            className="bg-white rounded-md border border-gray-100 shadow-sm p-6 flex lg:flex-col items-center lg:text-center gap-4"
           >
             <div
-              className="bg-gray-50 rounded-xl flex items-center justify-center"
+              className="bg-gray-100 rounded-md flex items-center justify-center"
               style={{ width: '64px', height: '64px', padding: '12px' }}
             >
-              <img
-                src={feature.svg}
-                alt={feature.title}
-                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-              />
+              <Icon size={32} className="text-gray-500" />
             </div>
             <div>
-              <p className="font-bold text-gray-900">{feature.title}</p>
-              <p className="text-sm text-gray-500 mt-1">{feature.description}</p>
+              <p className="font-bold text-gray-900">{title}</p>
+              <p className="text-sm text-gray-500 mt-1">{description}</p>
             </div>
           </div>
         ))}
