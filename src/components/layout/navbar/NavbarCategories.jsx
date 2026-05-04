@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Shield, ChevronDown } from 'lucide-react';
 import {
   DropdownMenu,
@@ -10,6 +11,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 export default function NavbarCategories({ categories, user }) {
+  const router = useRouter();
+
   return (
     <div className="hidden md:block border-t bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -18,6 +21,7 @@ export default function NavbarCategories({ categories, user }) {
           <div className="flex items-center gap-6">
             <Link
               href="/products"
+              prefetch={false}
               className="text-sm text-gray-600 hover:text-black transition-colors font-medium"
             >
               Todos los productos
@@ -25,14 +29,18 @@ export default function NavbarCategories({ categories, user }) {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="text-sm text-gray-600 hover:text-black transition-colors font-medium flex items-center gap-2">
+                <button className="text-sm text-gray-600 hover:text-black transition-colors font-medium flex items-center gap-2 cursor-pointer">
                   Categorías <ChevronDown size={16} />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start">
                 {categories.map(cat => (
-                  <DropdownMenuItem asChild key={cat.id} className="cursor-pointer">
-                    <Link href={`/products?category=${cat.id}`} prefetch={false}>{cat.name}</Link>
+                  <DropdownMenuItem 
+                    key={cat.id} 
+                    className="cursor-pointer"
+                    onClick={() => router.push(`/products?category=${cat.id}`)}
+                  >
+                    {cat.name}
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
@@ -41,13 +49,12 @@ export default function NavbarCategories({ categories, user }) {
 
           <div className="flex items-center gap-6">
             {user?.role === 'admin' ? (
-              <Link
-                href="/admin"
-                prefetch={false}
-                className="text-sm text-gray-600 hover:text-black transition-colors font-medium flex items-center gap-1"
+              <button
+                onClick={() => router.push('/admin')}
+                className="text-sm text-gray-600 hover:text-black transition-colors font-medium flex items-center gap-1 cursor-pointer"
               >
                 <Shield size={14} /> Panel Admin
-              </Link>
+              </button>
             ) : (
               <Link
                 href="/contact"
