@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
 import { toast } from 'sonner';
 import { authAPI } from '@/lib/axios';
 import useAuthStore from '@/store/useAuthStore';
@@ -37,15 +36,20 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex items-center justify-center px-4">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl">Iniciar sesión</CardTitle>
           <CardDescription>
-            ¿No tenés cuenta?{' '}
-            <Link href="/register" className="text-black font-semibold hover:underline">
-              Registrate
-            </Link>
+            <p className="text-sm text-gray-600">
+            ¿Todavía no tenés una cuenta?{' '}
+            <button 
+              onClick={() => router.push('/register')}
+              className="text-black font-semibold hover:underline hover:cursor-pointer"
+            >
+              Registrate acá
+            </button>
+          </p>
           </CardDescription>
         </CardHeader>
         <CardContent>

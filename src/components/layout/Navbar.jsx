@@ -1,7 +1,7 @@
 'use client';
 
-import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import useAuthStore from '@/store/useAuthStore';
 import useCartStore from '@/store/useCartStore';
 import { ecommerceAPI } from '@/lib/axios';
@@ -15,6 +15,7 @@ export default function Navbar() {
   const [categories, setCategories] = useState([]);
   const [expandSearchMobile, setExpandSearchMobile] = useState(false);
   const { user, logout } = useAuthStore();
+  const router = useRouter();
   const count = useCartStore(state => state.getCount());
   const searchInputRef = useRef(null);
 
@@ -44,9 +45,12 @@ export default function Navbar() {
         <div className="flex items-center h-16 gap-4">
 
           {/* Logo */}
-          <Link href="/" className="text-2xl font-black tracking-tighter text-gray-900 shrink-0">
+          <button
+            onClick={() => router.push('/')}
+            className="text-2xl font-black tracking-tighter text-gray-900 shrink-0 hover:cursor-pointer"
+          >
             Mi Tienda
-          </Link>
+          </button>
 
           {/* SearchBar siempre visible en desktop, centrada */}
           <div className="hidden md:flex flex-1 justify-center px-8">

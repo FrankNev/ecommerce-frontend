@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { toast } from 'sonner';
 import { authAPI } from '@/lib/axios';
 import useAuthStore from '@/store/useAuthStore';
@@ -46,15 +45,20 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex items-center justify-center px-4">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl">Crear cuenta</CardTitle>
           <CardDescription>
-            ¿Ya tenés cuenta?{' '}
-            <Link href="/login" className="text-black font-semibold hover:underline">
-              Iniciá sesión
-            </Link>
+            <p className="text-sm text-gray-600">
+            ¿Ya tenés una cuenta?{' '}
+            <button 
+              onClick={() => router.push('/login')}
+              className="text-black font-semibold hover:underline hover:cursor-pointer"
+            >
+              Iniciar sesión
+            </button>
+          </p>
           </CardDescription>
         </CardHeader>
         <CardContent>

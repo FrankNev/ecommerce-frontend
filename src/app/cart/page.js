@@ -1,7 +1,6 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { toast } from 'sonner';
 import useCartStore from '@/store/useCartStore';
 import useAuthStore from '@/store/useAuthStore';
@@ -189,8 +188,12 @@ export default function CartPage() {
               Continuar con el pago
             </Button>
 
-            <Button variant="ghost" className="w-full text-gray-500 bg-color-gray" asChild>
-              <Link href="/products">Seguir comprando</Link>
+            <Button
+              variant="ghost"
+              className="w-full text-gray-900 bg-gray-50"
+              onClick={() => router.push('/products')}
+            >
+              Seguir comprando
             </Button>
           </CardContent>
         </Card>
