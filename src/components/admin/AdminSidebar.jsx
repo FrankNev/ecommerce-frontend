@@ -33,8 +33,8 @@ export default function AdminSidebar() {
 
   return (
     <aside
-      className="relative flex flex-col h-screen bg-white border-r border-gray-100 shrink-0 transition-all duration-300 ease-in-out"
-      style={{ width: expanded ? '220px' : '60px' }}
+      className="sticky top-0 flex flex-col h-[100dvh] bg-white border-r border-gray-100 shrink-0 transition-all duration-300 ease-in-out z-20"
+      style={{ width: expanded ? '180px' : '60px' }}
     >
       {/* Logo / Brand */}
       <div
@@ -44,12 +44,12 @@ export default function AdminSidebar() {
         {expanded ? (
           <button
             onClick={() => router.push('/')}
-            className="flex items-center gap-2 text-gray-900 hover:text-black transition"
+            className="flex items-center gap-2 text-gray-900 cursor-pointer transition"
           >
             <ChevronLeft />
             <Store size={20} className="shrink-0" />
-            <span className="font-black tracking-tighter text-lg whitespace-nowrap">
-              Mi Tienda
+            <span className="font-black text-md whitespace-nowrap">
+              Volver
             </span>
           </button>
         ) : (
@@ -60,7 +60,7 @@ export default function AdminSidebar() {
       </div>
 
       {/* Nav items */}
-      <nav className="flex-1 py-4 overflow-hidden">
+      <nav className="flex-1 py-4 overflow-y-auto overflow-x-hidden">
         <ul className="space-y-0.5">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
@@ -73,7 +73,7 @@ export default function AdminSidebar() {
                   onClick={() => router.push(item.href)}
                   title={!expanded ? item.label : undefined}
                   className={`
-                    w-full relative flex items-center h-10 text-sm font-medium transition-colors group
+                    w-full relative flex items-center h-10 text-sm font-medium transition-colors cursor-pointer group
                     ${expanded ? 'px-4 gap-3' : 'justify-center'}
                     ${isActive
                       ? 'text-gray-900 bg-gray-100'
