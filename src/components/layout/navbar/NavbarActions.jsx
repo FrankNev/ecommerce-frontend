@@ -35,7 +35,7 @@ export default function NavbarActions({ user, cartCount, onLogout }) {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-9 w-9 rounded-full focus-visible:ring-0 cursor-pointer">
               <Avatar className="h-9 w-9">
-                <AvatarFallback className="bg-gray-100 text-gray-900 text-xs font-bold">
+                <AvatarFallback className="bg-gray-900 text-white text-xs font-bold">
                   {user.name?.charAt(0)?.toUpperCase() || <User size={16} />}
                 </AvatarFallback>
               </Avatar>
