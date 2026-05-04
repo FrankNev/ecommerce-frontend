@@ -2,10 +2,8 @@
  
 import { useState, useEffect } from 'react';
 import useCartStore from '@/store/useCartStore';
-import useAuthStore from '@/store/useAuthStore';
 import useProductImageStore from '@/store/useProductImageStore';
 import { usePromotions } from '@/hooks/usePromotions';
-import { useRouter, usePathname } from 'next/navigation';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -31,11 +29,8 @@ export default function VariantSelector({ product }) {
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const addItem = useCartStore(state => state.addItem);
-  const user = useAuthStore(state => state.user);
   const { setActiveIndex, reset } = useProductImageStore();
   const { getProductPrice } = usePromotions();
-  const router = useRouter();
-  const pathname = usePathname();
  
   const hasVariants = product.variants && product.variants.length > 0;
   const currentPrice = selectedVariant?.price ?? product.price;
@@ -66,7 +61,6 @@ export default function VariantSelector({ product }) {
     [...new Set(product.variants.map(v => getAttrs(v)[key]).filter(Boolean))];
  
   const handleAddToCart = () => {
-    if (!user) { toast.error('Debés iniciar sesión para agregar al carrito'); router.push(`/login?redirect=${pathname}`); return; }
     if (hasVariants && !selectedVariant) { toast.error('Seleccioná una variante antes de continuar'); return; }
     if (currentStock === 0) { toast.error('Producto sin stock'); return; }
     addItem({ ...product, selectedVariant }, quantity);
