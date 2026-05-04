@@ -27,6 +27,7 @@ export default function Breadcrumb({ items = [] }) {
             ) : (
               <Link
                 href={item.href}
+                prefetch={false}
                 className="hover:text-foreground transition-colors truncate max-w-[180px]"
               >
                 {item.label}

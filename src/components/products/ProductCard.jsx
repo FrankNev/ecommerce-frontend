@@ -17,7 +17,7 @@ export default function ProductCard({ product, totalHeight }) {
 
   return (
     <div className="group bg-white rounded-2md overflow-hidden shadow-sm hover:shadow-md transition" style={{ minWidth: 200 }}>
-      <Link href={`/products/${product._id}`} prefetch={false}>
+      <Link href={`/products/${product._id}`}>
         {/* Imagen */}
         <div className="relative bg-gray-100 overflow-hidden" style={{ height: totalHeight }}>
           {image ? (
