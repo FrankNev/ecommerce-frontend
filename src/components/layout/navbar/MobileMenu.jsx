@@ -1,32 +1,16 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
-import {
-  ShoppingCart,
-  Menu,
-  Search,
-  Shield,
-  ClipboardList,
-  LogOut,
-  Tag,
-  Phone,
-} from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { ShoppingCart, Menu, Search, Shield, ClipboardList, LogOut, Tag, Phone, User} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import AppSidebar from '@/components/layout/AppSidebar';
 
-export default function MobileMenu({
-  user,
-  cartCount,
-  categories,
-  onLogout,
-  onToggleSearch,
-}) {
+export default function MobileMenu({ user, cartCount, categories, onLogout, onToggleSearch, }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
   const isAdmin = user?.role === 'admin';
-
+  const router = useRouter();
   const sections = [];
 
   // 1. Todos los productos (siempre visible)
@@ -65,9 +49,8 @@ export default function MobileMenu({
     sections.push({
       id: 'contact',
       label: 'Contacto',
-      href: '/contact',
       icon: <Phone size={16} />,
-      dividerBefore: true,
+      href: '/contact',
     });
   }
 
@@ -105,6 +88,7 @@ export default function MobileMenu({
       id: 'login',
       label: 'Iniciar sesión',
       href: '/login',
+      icon: <User size={16} />,
       dividerBefore: true,
     });
   }
@@ -130,15 +114,18 @@ export default function MobileMenu({
           <Search size={22} />
         </Button>
 
-        <Button variant="ghost" size="icon" asChild className="relative">
-          <Link href="/cart">
-            <ShoppingCart size={22} />
-            {cartCount > 0 && (
-              <Badge className="absolute bg-red-500 -top-1 -right-1 px-1 min-w-[1rem] h-4 flex items-center justify-center text-[10px]">
-                {cartCount}
-              </Badge>
-            )}
-          </Link>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative"
+          onClick={() => router.push('/cart')}
+        >
+          <ShoppingCart size={22} />
+          {cartCount > 0 && (
+            <Badge className="absolute bg-red-500 -top-1 -right-1 px-1 min-w-[1rem] h-4 flex items-center justify-center text-[10px]">
+              {cartCount}
+            </Badge>
+          )}
         </Button>
 
         <Button
