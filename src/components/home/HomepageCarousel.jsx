@@ -17,7 +17,7 @@ const SLIDES = [
     title: 'Los últimos smartphones',
     subtitle: 'Encontrá el tuyo al mejor precio',
     cta: 'Ver productos',
-    categoryId: '2',
+    categoryId: '1',
     overlay: true,
   },
   {
@@ -25,7 +25,7 @@ const SLIDES = [
     title: 'Smartwatches y wearables',
     subtitle: 'Tecnología en tu muñeca',
     cta: 'Explorar',
-    categoryId: '3',
+    categoryId: '4',
     overlay: true,
   },
   {
@@ -33,7 +33,7 @@ const SLIDES = [
     title: 'Audio de alta calidad',
     subtitle: 'Auriculares y parlantes premium',
     cta: 'Ver más',
-    categoryId: '4',
+    categoryId: '2',
     overlay: true,
   },
 ];
