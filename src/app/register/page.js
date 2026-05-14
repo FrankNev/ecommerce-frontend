@@ -84,7 +84,7 @@ export default function RegisterPage() {
                 value={form.email}
                 onChange={handleChange}
                 required
-                placeholder="tu@email.com"
+                placeholder="juanperez@gmail.com"
               />
             </div>
             <div className="space-y-1">
@@ -96,7 +96,7 @@ export default function RegisterPage() {
                 value={form.password}
                 onChange={handleChange}
                 required
-                placeholder="••••••••"
+                placeholder="Ingrese una contraseña..."
               />
             </div>
             <div className="space-y-1">
@@ -108,7 +108,7 @@ export default function RegisterPage() {
                 value={form.confirmPassword}
                 onChange={handleChange}
                 required
-                placeholder="••••••••"
+                placeholder="Repita la contraseña..."
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
