@@ -45,11 +45,6 @@ export default function CartPage() {
   }, 0);
 
   const handleCheckout = () => {
-    if (!user) {
-      toast.error('Debés iniciar sesión para continuar');
-      router.push('/login?redirect=/checkout');
-      return;
-    }
     router.push('/checkout');
   };
 
@@ -184,7 +179,7 @@ export default function CartPage() {
               <span>${discountedTotal.toLocaleString('es-AR')}</span>
             </div>
 
-            <Button className="w-full" onClick={handleCheckout}>
+            <Button className="w-full" onClick={() => router.push('/checkout')}>
               Continuar con el pago
             </Button>
 
