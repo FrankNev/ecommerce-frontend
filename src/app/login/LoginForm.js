@@ -63,7 +63,7 @@ export default function LoginForm() {
                 value={form.email}
                 onChange={handleChange}
                 required
-                placeholder="tu@email.com"
+                placeholder="tuemail@gmail.com"
               />
             </div>
             <div className="space-y-1">
@@ -75,7 +75,7 @@ export default function LoginForm() {
                 value={form.password}
                 onChange={handleChange}
                 required
-                placeholder="••••••••"
+                placeholder="Ingrese su contraseña"
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
