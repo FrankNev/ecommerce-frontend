@@ -7,8 +7,6 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselPrevious,
-  CarouselNext,
 } from '@/components/ui/carousel';
 
 export const metadata = {
@@ -29,8 +27,13 @@ async function getMostPurchased() {
   try {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_ECOMMERCE_API_URL}/api/products/most-purchased?limit=6`,
-      { next: { revalidate: 3600 } } // cachea 1 hora — no necesita ser tiempo real
+      { next: { revalidate: 3600 } }
     );
+
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+
     return await res.json();
   } catch (error) {
     console.error('most-purchased error:', error.message);
@@ -42,28 +45,29 @@ export default async function HomePage() {
   const mostPurchased = await getMostPurchased();
 
   return (
-    <div className="space-y-16 pb-16">
+    <div className="space-y-16 pb-8">
 
       {/* Carrusel hero */}
       <HomepageCarousel />
 
       {/* Marcas */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="max-w-7xl mx-auto px-4 lg:px-8">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Explorá por marca</h2>
         <Carousel opts={{ align: "start", loop: true }}>
-          <CarouselContent className="ml-0">
+          <CarouselContent className="ml-0 pb-2">
             {BRANDS.map(brand => (
-              <CarouselItem key={brand.name} className="px-3 py-2 basis-auto min-w-fit">
+              <CarouselItem key={brand.name} className="px-3 basis-auto min-w-fit">
                 <BrandCard brand={brand} />
               </CarouselItem>
             ))}
           </CarouselContent>
-
         </Carousel>
       </section>
 
       {/* Productos más comprados */}
-      <ProductCarousel title="Productos más comprados" products={mostPurchased} />
+      <div className="max-w-7xl mx-auto px-4 lg:px-8">
+        <ProductCarousel title="Productos más comprados" products={mostPurchased} />
+      </div>
 
       {/* Features */}
       <div className="bg-gray-900 py-8">
