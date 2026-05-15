@@ -95,7 +95,7 @@ export default async function ProductsPage({ searchParams }) {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-2 lg:grid-cols-4 lg:gap-6 gap-3">
                 {products.map(product => (
                   <ProductCard key={product._id} product={product} totalHeight={200} />
                 ))}
@@ -111,6 +111,7 @@ export default async function ProductsPage({ searchParams }) {
                       <Link
                         key={page}
                         href={`/products?${pageParams.toString()}`}
+                        prefetch={false}
                         className={`px-4 py-2 rounded-lg text-sm font-medium transition ${page === currentPage
                           ? 'bg-black text-white'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
