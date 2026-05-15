@@ -138,7 +138,7 @@ export default function VariantSelector({ product }) {
  
       <Button className="w-full" onClick={handleAddToCart} disabled={currentStock === 0 || (hasVariants && !selectedVariant)}>
         <ShoppingCart size={16} />
-        {currentStock === 0 ? 'Sin stock' : 'Agregar al carrito'}
+        { !selectedVariant ? 'Seleccione una variante' : currentStock === 0 ? 'Sin stock' : 'Agregar al carrito'}
       </Button>
     </div>
   );

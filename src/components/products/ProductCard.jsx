@@ -16,7 +16,7 @@ export default function ProductCard({ product, totalHeight }) {
   const hasDiscount = discountAmount > 0;
 
   return (
-    <div className="group bg-white rounded-2md overflow-hidden shadow-sm hover:shadow-md transition" style={{ minWidth: 200 }}>
+    <div className="group bg-white rounded-2md overflow-hidden shadow-sm hover:shadow-md transition" style={{ minWidth: 180 }}>
       <Link href={`/products/${product._id}`} prefetch={false}>
         {/* Imagen */}
         <div className="relative bg-gray-100 overflow-hidden" style={{ height: totalHeight }}>
@@ -81,7 +81,7 @@ export default function ProductCard({ product, totalHeight }) {
         <button
           onClick={() => addToCart(product)}
           disabled={isOutOfStock}
-          className={`w-full py-2 rounded-lg text-sm font-semibold transition flex items-center justify-center gap-2
+          className={`w-full p-2 rounded-md text-sm font-semibold transition flex items-center justify-center gap-2
             ${isOutOfStock
               ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
               : 'bg-gray-900 text-white hover:bg-gray-700'
