@@ -1,10 +1,10 @@
-import { Geist } from 'next/font/google';
+import { Roboto } from 'next/font/google';
 import './globals.css';
 import { Toaster } from 'sonner';
 import AuthHydrator from '@/components/auth/AuthHydrator';
 import ConditionalLayout from '@/components/layout/ConditionalLayout';
 
-const geist = Geist({ subsets: ['latin'] });
+const roboto = Roboto({ subsets: ['latin'], variable: '--font-montserrat', });
 
 export const metadata = {
   metadataBase: new URL('https://ecommerce-frontend-nine-ebon.vercel.app'),
@@ -46,8 +46,8 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="es">
-      <body className={geist.className}>
+    <html lang="es" className={`${roboto.variable} antialiased`}>
+      <body className={roboto.className}>
         <Toaster position="top-right" richColors />
         <AuthHydrator />
         <ConditionalLayout>
