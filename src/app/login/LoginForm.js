@@ -35,6 +35,10 @@ export default function LoginForm() {
     }
   };
 
+  const handleGoogleLogin = () => {
+    window.location.href = `${process.env.NEXT_PUBLIC_AUTH_API_URL}/api/auth/google`;
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <Card className="w-full max-w-md">
@@ -42,14 +46,14 @@ export default function LoginForm() {
           <CardTitle className="text-2xl">Iniciar sesión</CardTitle>
           <CardDescription>
             <p className="text-sm text-gray-600">
-            ¿Todavía no tenés una cuenta?{' '}
-            <button 
-              onClick={() => router.push('/register')}
-              className="text-black font-semibold hover:underline hover:cursor-pointer"
-            >
-              Registrate acá
-            </button>
-          </p>
+              ¿Todavía no tenés una cuenta?{' '}
+              <button
+                onClick={() => router.push('/register')}
+                className="text-black font-semibold hover:underline hover:cursor-pointer"
+              >
+                Registrate acá
+              </button>
+            </p>
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -82,6 +86,11 @@ export default function LoginForm() {
               {loading ? 'Ingresando...' : 'Ingresar'}
             </Button>
           </form>
+
+          <Button type="button" variant="outline" onClick={handleGoogleLogin} className="w-full mt-2">
+            <img className="w-5 h-5 mr-2" src='https://www.svgrepo.com/show/303108/google-icon-logo.svg' alt='Logo Google' ></img>
+            Acceder con Google
+          </Button>
         </CardContent>
       </Card>
     </div>
