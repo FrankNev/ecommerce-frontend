@@ -2,6 +2,7 @@ import Link from 'next/link';
 import ProductCard from '@/components/products/ProductCard';
 import ProductFilters from '@/components/products/ProductFilters';
 import Breadcrumb from '@/components/ui/breadcrumb';
+import { getCategories } from '@/lib/homeService';
 
 export const metadata = {
   title: 'Productos',
@@ -37,25 +38,13 @@ async function getBrands() {
   }
 }
 
-async function getCategories() {
-  try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_ECOMMERCE_API_URL}/api/categories`,
-      { cache: 'no-store' }
-    );
-    return await res.json();
-  } catch (error) {
-    return [];
-  }
-}
-
 export default async function ProductsPage({ searchParams }) {
   const params = await searchParams;
-  const [{ products, total, pages, currentPage }, categories, brands] = await Promise.all([
+  const [{ products, total, pages, currentPage }, brands] = await Promise.all([
     getProducts(params),
-    getCategories(),
     getBrands(),
   ]);
+  const categories = await getCategories();
 
   const activeCategoryId = params.category ? Number(params.category) : null;
   const activeCategory = activeCategoryId
@@ -69,7 +58,7 @@ export default async function ProductsPage({ searchParams }) {
 
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div className="max-w-8xl mx-auto lg:mx-8 px-4 sm:px-6 lg:px-8 py-10">
 
       {/* Breadcrumb */}
       <div className="mb-6">
