@@ -5,7 +5,7 @@ import { ShoppingCart } from 'lucide-react';
 import { useAddToCart } from '@/hooks/useAddToCart';
 import { usePromotions } from '@/hooks/usePromotions';
 
-export default function ProductCard({ product, totalHeight }) {
+export default function ProductCard({ product }) {
   const image = product.images?.[0]?.url;
   const isOutOfStock = product.stock === 0;
   const hasVariants = product.variants && product.variants.length > 0;
@@ -16,23 +16,21 @@ export default function ProductCard({ product, totalHeight }) {
   const hasDiscount = discountAmount > 0;
 
   return (
-    <div className="group bg-white rounded-2md overflow-hidden shadow-sm hover:shadow-md transition" style={{ minWidth: 180 }}>
+    <div className="group bg-white rounded-md overflow-hidden shadow-sm hover:shadow-md transition min-w-[180px]">
       <Link href={`/products/${product._id}`} prefetch={false}>
         {/* Imagen */}
-        <div className="relative bg-gray-100 overflow-hidden" style={{ height: totalHeight }}>
+        <div className="relative bg-gray-100 overflow-hidden w-full h-[180px] md:h-[200px]">
           {image ? (
             <img
               src={image}
               alt={product.name}
-              style={{ width: '100%', height: '110%', objectFit: 'contain' }}
-              className="group-hover:scale-105 transition duration-300"
+              className="w-full h-full object-contain group-hover:scale-105 transition duration-300"
             />
           ) : (
             <img
               src='https://res.cloudinary.com/dh10owmif/image/upload/v1776060127/images_sz53ic.png'
-              alt={product.name}
-              style={{ width: '100%', height: '110%', objectFit: 'cover' }}
-              className="group-hover:scale-105 transition duration-300"
+              alt="Este producto no tiene imagen"
+              className="w-full h-full object-contain group-hover:scale-105 transition duration-300"
             />
           )}
 
@@ -45,9 +43,14 @@ export default function ProductCard({ product, totalHeight }) {
           )}
 
           {/* Badge promoción */}
-          {hasDiscount && !isOutOfStock && (
-            <div className="absolute top-2 left-2">
-              <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+          {hasDiscount && appliedPromotion && !isOutOfStock && (
+            <div className="absolute top-2 left-2 z-10">
+              <span
+                className="text-white text-xs font-bold px-2 py-1 rounded-md shadow-sm"
+                style={{
+                  backgroundColor: product.badgeColor || '#ef4444'
+                }}
+              >
                 {appliedPromotion.name}
               </span>
             </div>
@@ -56,18 +59,28 @@ export default function ProductCard({ product, totalHeight }) {
 
         {/* Info */}
         <div className="p-4">
-          {product.brand && (
-            <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">{product.brand}</p>
-          )}
-          <h3 className="font-semibold text-gray-900 group-hover:text-black transition line-clamp-2">
+          <h3 className="text-gray-900 group-hover:text-black transition line-clamp-2">
             {product.name}
           </h3>
 
           <div className="mt-2 space-y-0.5">
             {hasDiscount && (
-              <p className="text-sm text-gray-400 line-through">
-                ${product.price.toLocaleString('es-AR')}
-              </p>
+              <div className="flex items-center">
+                <p className="text-sm text-gray-400 line-through mr-2">
+                  ${product.price.toLocaleString('es-AR')}
+                </p>
+                <span
+                  className="text-white text-xs font-bold px-2 py-1 rounded-md shadow-sm"
+                  style={{
+                    backgroundColor: product.badgeColor || '#ef4444'
+                  }}
+                >
+                  {appliedPromotion.discount_type === 'PERCENTAGE'
+                    ? `-${Math.trunc(appliedPromotion.value)}%`
+                    : `-$${appliedPromotion.value}`
+                  }
+                </span>
+              </div>
             )}
             <p className={`text-md font-semibold ${hasDiscount ? 'text-green-600' : 'text-gray-900'}`}>
               ${finalPrice.toLocaleString('es-AR')}
@@ -84,7 +97,7 @@ export default function ProductCard({ product, totalHeight }) {
           className={`w-full p-2 rounded-md text-sm font-semibold transition flex items-center justify-center gap-2
             ${isOutOfStock
               ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              : 'bg-gray-900 text-white hover:bg-gray-700'
+              : 'bg-gray-900 text-white hover:bg-gray-700 cursor-pointer'
             }`}
         >
           <ShoppingCart size={16} />
