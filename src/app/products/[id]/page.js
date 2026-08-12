@@ -84,7 +84,7 @@ export default async function ProductDetailPage({ params }) {
 
   if (!product) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-16 text-center text-gray-500">
+      <div className="max-w-8xl mx-auto px-4 py-16 text-center text-gray-500">
         Producto no encontrado
       </div>
     );
@@ -96,7 +96,7 @@ export default async function ProductDetailPage({ params }) {
   ];
 
   return (
-    <div className="max-w-7xl rounded-md mt-4 mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12 bg-white">
+    <div className="max-w-8xl rounded-md mt-4 mx-auto lg:mx-8 px-4 sm:px-6 lg:px-8 py-6 space-y-12 bg-white">
       <ProductJsonLd product={product} />
 
       <Breadcrumb items={breadcrumbItems} />
@@ -157,7 +157,9 @@ export default async function ProductDetailPage({ params }) {
       </div>
 
       {/* SECCIÓN INFERIOR: Carrusel de productos relacionados */}
-      <ProductCarousel title="Productos relacionados" products={relatedProducts} />
+      <div className="">
+        <ProductCarousel title="Productos relacionados" products={relatedProducts} />
+      </div>
     </div>
   );
 }
