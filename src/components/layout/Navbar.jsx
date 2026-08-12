@@ -41,7 +41,7 @@ export default function Navbar() {
     <header className="sticky top-0 z-50 w-full bg-white border-b shadow-sm">
 
       {/* Nivel 1 */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-8xl mx-auto lg:mx-8 px-4 sm:px-6 lg:px-8">
         <div className="flex items-center h-16 gap-4">
 
           {/* Logo */}

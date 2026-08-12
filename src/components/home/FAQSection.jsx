@@ -30,7 +30,7 @@ const FAQS = [
 
 export default function FAQSection() {
   return (
-    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="max-w-8xl mx-auto lg:mx-8 px-4 sm:px-6 lg:px-8">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Preguntas frecuentes</h2>
       <Accordion type="single" collapsible className="space-y-2">
         {FAQS.map((faq, i) => (

@@ -15,7 +15,7 @@ export default function NavbarCategories({ categories, user }) {
 
   return (
     <div className="hidden md:block border-t bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-8xl mx-auto lg:mx-8 px-4 sm:px-6 lg:px-8">
         <nav className="flex items-center justify-between h-11">
 
           <div className="flex items-center gap-6">
