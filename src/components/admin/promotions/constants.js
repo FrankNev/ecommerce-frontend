@@ -12,6 +12,8 @@ export const EMPTY_FORM = {
   is_active: true,
   conditions: { min_purchase: '', excluded_categories: [], excluded_brands: [] },
   product_ids: [],
+  color: '#da1212',
+  image_url: '',
 };
 
 export const TYPE_LABELS = {
