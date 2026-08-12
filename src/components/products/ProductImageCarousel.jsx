@@ -4,7 +4,7 @@ import { useEffect, useCallback } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
 import useProductImageStore from '@/store/useProductImageStore';
 import { Button } from '@/components/ui/button';
-import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function ProductImageCarousel({ images, productName }) {
   const { activeIndex, setActiveIndex } = useProductImageStore();
@@ -31,8 +31,7 @@ export default function ProductImageCarousel({ images, productName }) {
   const scrollPrev = () => emblaApi?.scrollPrev();
   const scrollNext = () => emblaApi?.scrollNext();
 
-  const fallbackSrc =
-    'https://res.cloudinary.com/dh10owmif/image/upload/v1776060127/images_sz53ic.png';
+  const fallbackSrc = 'https://res.cloudinary.com/dh10owmif/image/upload/v1776060127/images_sz53ic.png';
 
   if (!images || images.length === 0) {
     return (
@@ -75,23 +74,19 @@ export default function ProductImageCarousel({ images, productName }) {
         <>
           <Button
             variant="outline"
-            size="icon-sm"
-            className="absolute top-1/2 -translate-y-1/2"
-            style={{ left: '0px' }}
+            size="icon"
+            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/70 border-gray-300/70 text-black hover:bg-gray-300/70 rounded-full h-10 w-10 opacity-100 transition-all duration-300 z-10 hidden md:flex"
             onClick={scrollPrev}
           >
-            <ChevronLeftIcon />
-            <span className="sr-only">Anterior</span>
+            <ChevronLeft className="h-6 w-6"/>
           </Button>
           <Button
             variant="outline"
-            size="icon-sm"
-            className="absolute top-1/2 -translate-y-1/2"
-            style={{ right: '0px' }}
+            size="icon"
+            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/70 border-gray-300/70 text-black hover:bg-gray-300/70 rounded-full h-10 w-10 opacity-100 transition-all duration-300 z-10 hidden md:flex"
             onClick={scrollNext}
           >
-            <ChevronRightIcon />
-            <span className="sr-only">Siguiente</span>
+            <ChevronRight className="h-6 w-6"/>
           </Button>
         </>
       )}
@@ -106,9 +101,8 @@ export default function ProductImageCarousel({ images, productName }) {
                 emblaApi?.scrollTo(i);
                 setActiveIndex(i);
               }}
-              className={`w-2 h-2 rounded-full transition-all ${
-                i === activeIndex ? 'bg-gray-900 scale-125' : 'bg-gray-300'
-              }`}
+              className={`w-2 h-2 rounded-full transition-all ${i === activeIndex ? 'bg-gray-900 scale-125' : 'bg-gray-300'
+                }`}
               aria-label={`Imagen ${i + 1}`}
             />
           ))}
