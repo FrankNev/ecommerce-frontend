@@ -78,7 +78,7 @@ export default function VariantSelector({ product }) {
           </p>
         )}
         <div className="flex items-center gap-3 flex-wrap">
-          <p className={`text-4xl font-bold ${hasDiscount ? 'text-green-600' : 'text-gray-900'}`}>
+          <p className={`text-4xl ${hasDiscount ? 'text-green-600' : 'text-gray-900'}`}>
             ${Number(finalPrice).toLocaleString('es-AR')}
           </p>
           {hasDiscount && appliedPromotion && (
@@ -93,7 +93,7 @@ export default function VariantSelector({ product }) {
       </div>
  
       <Badge variant={currentStock > 0 ? 'default' : 'destructive'}>
-        {hasVariants && !selectedVariant ? 'Seleccioná una variante' : currentStock > 0 ? `${currentStock} disponibles` : 'Sin stock'}
+        {hasVariants && !selectedVariant ? 'Seleccioná una variante' : currentStock > 0 ? `${currentStock} En stock` : 'Sin stock'}
       </Badge>
  
       <Separator />
@@ -138,7 +138,7 @@ export default function VariantSelector({ product }) {
  
       <Button className="w-full" onClick={handleAddToCart} disabled={currentStock === 0 || (hasVariants && !selectedVariant)}>
         <ShoppingCart size={16} />
-        { !selectedVariant ? 'Seleccione una variante' : currentStock === 0 ? 'Sin stock' : 'Agregar al carrito'}
+        { hasVariants && !selectedVariant ? 'Seleccione una variante' : currentStock === 0 ? 'Sin stock' : 'Agregar al carrito'}
       </Button>
     </div>
   );
